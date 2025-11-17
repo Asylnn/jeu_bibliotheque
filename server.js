@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express()
+app.use(express.static('public'))
 const http = require('http')
 const server = http.createServer(app)
 const io = new require("socket.io")(server)
@@ -11,3 +12,12 @@ server.listen(8887, () => {
 app.get('/', (req, res) => {
     res.sendFile("index.html", {root: __dirname})
 })
+
+io.on("connect", (socket) => {
+    console.log("new connection")
+    socket.on("ping", () => {
+        console.log("pong")
+        socket.emit("pong")
+    })
+})
+
