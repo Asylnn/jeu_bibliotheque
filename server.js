@@ -13,6 +13,8 @@ app.get('/', (req, res) => {
     res.sendFile("index.html", {root: __dirname})
 })
 
+//commentairee
+
 io.on("connect", (socket) => {
     console.log("new connection")
     socket.on("ping", () => {
