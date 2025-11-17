@@ -17,11 +17,22 @@ app.get('/', (req, res) => {
 //commentaire
 //commentaire3
 
+
+function message_chat(data)
+{
+    console.log(data.message)
+}
+
 io.on("connect", (socket) => {
-    console.log("new connection")
+    console.log("nouvelle connection")
     socket.on("ping", () => {
         console.log("pong")
         socket.emit("pong")
     })
+    socket.on("envoie message chat", function (data) {
+        console.log(data.message)
+        io.broadcast("donner message chat", data.message)
+    })
+    
 })
 
