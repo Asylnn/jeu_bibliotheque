@@ -13,11 +13,6 @@ app.get('/', (req, res) => {
     res.sendFile("index.html", {root: __dirname})
 })
 
-//commentairee
-//commentaire
-//commentaire3
-
-
 function message_chat(data)
 {
     console.log(data.message)
