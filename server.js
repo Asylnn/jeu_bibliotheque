@@ -92,6 +92,9 @@ io.on("connect", (socket) => {
         
     })
 
+    socket.on("message", (arg) => 
+    {console.log(arg)}) //le serveur reçoit le message
+
     socket.on("envoie message chat", function (data) {
         console.log(data.message)//DZYDZIEYD
   //      io.broadcast("donner message chat", data.message)

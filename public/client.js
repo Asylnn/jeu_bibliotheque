@@ -23,6 +23,15 @@ function seDeconnecterDeLaPartie(){
     console.log("sortie de la partie");
 }
 
+function envoyerUnMessage(){
+    let input=document.getElementById("message");
+    socket.emit("message", input.value);
+    input.value=""
+    console.log("message envoyé");
+
+
+}
+
 
 socket.on("erreur", 
     messageErreur => {
@@ -37,6 +46,10 @@ socket.on("liste joueurs", noms => {
 })
 
 socket.emit("envoie message chat", {message:"Salut ca va"})
+
+
+
+
 
 //PARTIE D3
 
