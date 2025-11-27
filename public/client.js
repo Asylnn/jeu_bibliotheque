@@ -11,38 +11,83 @@ socket.on("pong", data => {
 
 function entrerDansLaPartie(){
     let input=document.getElementById("nom");
+    //let elem=document.getElementById("entree-nom");
+    socket.emit('entree', input.value);
+    console.log("entrer dans la partie")
+    //elem.style.display = "none"
+
+    
+    
+}
+
+/*
+function entrerDansLaPartie(){
+    let elem=document.getElementById("nom");
+    elem.style.display = "none"
+    elem.style.display = "inline"
     socket.emit('entree', input.value);
     console.log("entrer dans la partie")
     
     
-}
+}*/
 
 function seDeconnecterDeLaPartie(){
     let input=document.getElementById("nom");
     socket.emit("sortie", input.value);
     console.log("sortie de la partie");
+     console.log("bien entree")
+    let messagerie=document.getElementById("messagerie")
+    let elem=document.getElementById("entree-nom");
+    elem.style.display = "block"
+    messagerie.style.display="none"
 }
 
 function envoyerUnMessage(){
     let input=document.getElementById("message");
     socket.emit("message", input.value);
     input.value=""
-    console.log("message envoyé");
-
+    console.log("message envoyé")
 
 }
 
+socket.on("entree dans la partie", () => {
+    console.log("bien entree")
+    let messagerie=document.getElementById("messagerie")
+    let elem=document.getElementById("entree-nom");
+    elem.style.display = "none"
+    messagerie.style.display="block"
+
+})
+
+
+
+socket.on("envoie message client", message => 
+{
+    console.log("message reçu")
+    let messagerie=document.getElementById("messagerie");
+    messagerie.innerHTML += `<p>${message.nom} : ${message.message}</p>` // message.nom + " : " + message.message
+  
+})
 
 socket.on("erreur", 
     messageErreur => {
+        let erreur=document.getElementById("erreur")
+        erreur.innerHTML=messageErreur
         console.log(messageErreur)
+        setTimeout(() => {
+            erreur.innerHTML=""
+        }, 10000)
     }
 )
 
+socket.on("qqch", () => {})
+
 socket.on("liste joueurs", noms => {
     let elem=document.getElementById("joueurs")
-    elem.textContent=noms.toString()
-    console.log("liste noms : " +  noms)
+    elem.textContent=noms.nom.toString()
+    console.log("liste noms : " +  noms.nom)
+    let listeJoueurs=document.getElementById("nombreJoueurs")
+    listeJoueurs.innerHTML = `${noms.nom.length}/${noms.max}` 
 })
 
 socket.emit("envoie message chat", {message:"Salut ca va"})

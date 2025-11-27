@@ -21,6 +21,7 @@ class Joueur{
 }
 
 let dict_joueurs={}
+let nbJoueursMax=4
 
 
 /*
@@ -38,22 +39,24 @@ d = "abc"
 objjavascript.abc == objjavascript[d]
 
 */
-function sortiePartie(){
-    socket.on("sortie", (nom) => {
-        console.log("message sortie reçu")
-        delete dict_joueurs[socket.id]
-    })
-
+/*function sortiePartie(){
+    console.log("message sortie reçu")
+    delete dict_joueurs[socket.id]
+    socket.emit("liste joueurs", getNoms())
 }
+
+*/
 
 function getNoms(){
     jrs=Object.values(dict_joueurs)
     noms=[]
+ 
      for(let joueur of jrs){
             noms.push(joueur.nom)
         }
-   
-    return noms;
+
+    return {nom:noms, max:nbJoueursMax}
+    
 }
 io.on("connect", (socket) => {
     console.log("nouvelle connection")
@@ -62,20 +65,23 @@ io.on("connect", (socket) => {
         socket.emit("pong")
         
     })
-    jrs=Object.values(dict_joueurs)
-    noms=[]
-     for(let joueur of jrs){
-            noms.push(joueur.nom)
-        }
     socket.emit("liste joueurs", getNoms())
     
 
-    socket.on("sortie", sortiePartie)
+    socket.on("sortie", () => {console.log("message sortie reçu")
+        delete dict_joueurs[socket.id]
+        socket.emit("liste joueurs", getNoms())
+    })
 
     
 
     socket.on("entree", (nom) =>
     {
+
+        if(Object.values(dict_joueurs).length==nbJoueursMax){
+            socket.emit("erreur", "Nombre de joueurs maximal atteint")
+            return;
+        }
 
         console.log("message reçu")
         jrs=Object.values(dict_joueurs)
@@ -85,15 +91,31 @@ io.on("connect", (socket) => {
                 return;
             } 
         }
+        socket.emit("entree dans la partie")
+        
 
         dict_joueurs[socket.id]= new Joueur(socket.id, nom)
-        socket.broadcast.emit("liste joueurs", getNoms())
+        io.emit("liste joueurs", getNoms())
+        
         
         
     })
 
+    
+
     socket.on("message", (arg) => 
-    {console.log(arg)}) //le serveur reçoit le message
+    {
+
+        if(arg==""){
+            return;
+        }
+
+        console.log(arg)
+        console.log(dict_joueurs)
+        io.emit("envoie message client", {nom:dict_joueurs[socket.id].nom, message:arg})
+    }) //le serveur reçoit le message
+    
+
 
     socket.on("envoie message chat", function (data) {
         console.log(data.message)//DZYDZIEYD
@@ -106,8 +128,8 @@ io.on("connect", (socket) => {
 
 )
 
-io.on("deconnecter", (socket) => {
-    console.log("deconnecter")
+io.on("deconnection", (socket) => {
+    console.log("deconnection")
     sortiePartie()
 
   

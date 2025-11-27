@@ -9,13 +9,14 @@
 <body>
     <h1>Mon Super Jeu</h1>
     <div id="entree-nom">
-        <spam> Veuillez entrer votre nom  <input id="nom" type="text"/>
-        <button onClick="entrerDansLaPartie()">
-            Valider
-        </button>
-        </spam>
+        <span> Veuillez entrer votre nom  
+            <input id="nom" type="text"/>
+            <button onClick="entrerDansLaPartie()">
+                Valider
+            </button>
+        </span>
         
-        </div>
+    </div>
 
     <div id="deconnexion">
         <button onClick="seDeconnecterDeLaPartie()">
@@ -24,12 +25,26 @@
 
     </div>
 
-    <div id="messagerie">
+    <div id="messagerie" style="display:none">
+
         <spam>Veuillez écrire un message <input id="message" type="text"/>
             <button onClick="envoyerUnMessage()">Envoyer</button>
 
         </spam>
 
+    </div>
+
+    <div id="nombreJoueurs">
+        <span>Nombre de joueurs
+             
+        </span>
+        <span id="quantite">
+
+        </span>
+    </div>
+
+    <div id="erreur">
+        
     </div>
 
     <p id="joueurs"></p>
