@@ -73,6 +73,12 @@ io.on("connect", (socket) => {
         socket.emit("liste joueurs", getNoms())
     })
 
+    socket.on("disconnect", () => {
+        console.log("deconnection de la part de " + socket.id)
+        delete dict_joueurs[socket.id]
+        socket.broadcast.emit("liste joueurs", getNoms())
+    })
+
     
 
     socket.on("entree", (nom) =>
@@ -122,24 +128,4 @@ io.on("connect", (socket) => {
   //      io.broadcast("donner message chat", data.message)
     })
     
-}
-
-    
-
-)
-
-io.on("deconnection", (socket) => {
-    console.log("deconnection")
-    sortiePartie()
-
-  
-
-    
-}
-
-
-
-)
-
-
-
+})
