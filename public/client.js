@@ -99,20 +99,22 @@ socket.emit("envoie message chat", {message:"Salut ca va"})
 //PARTIE D3
 
 
-d3.select("#zonedejeu").append("svg").attr("width", 500).attr("height", 500);
-
 function displayBook(coordinate, book)
 {
     let bookWidth = 25
-    let path = `M${coordinate[0]} ${coordinate[1]} L${coordinate[0]+bookWidth} ${coordinate[1]} L${coordinate[0]+bookWidth} ${coordinate[1]+book.getSize()} L${coordinate[0]} ${coordinate[1]+book.getSize()} Z`
+    console.log(book.title)
+    let path = `M${coordinate[0]} ${coordinate[1]} L${coordinate[0]+bookWidth} ${coordinate[1]} L${coordinate[0]+bookWidth} ${coordinate[1]-book.getSize()} L${coordinate[0]} ${coordinate[1]-book.getSize()} Z`
     d3.select("svg")   
         .append("path")
         .attr("d", path)
         .attr("stroke", "black")
+        .attr("stroke-width", 4)
         .attr("fill", book.getColor())
-        .attr("id", "b")
+        //.attr("id", "b")
         .on("click", function(d) {  
-            console.log(d.target.id)})
+            console.log(d.target)})
+        .append("title")
+        .html(book.titre)
 
 }
 
@@ -131,7 +133,10 @@ function displayBook(coordinate, book)
 
     console.log(jsonBooks[10].getColor())
 
-    //displayBook([200,200], jsonBooks[4])
+    for(let i = 0; i < jsonBooks.length; i++){
+        displayBook([32*(i+1),200], jsonBooks[i])
+    }
+    
     console.log("ahhhhh")
 })()
 
