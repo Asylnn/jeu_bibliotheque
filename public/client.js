@@ -140,6 +140,20 @@ function displayBook(coordinate, book)
     console.log("ahhhhh")
 })()
 
+//etageres
+
+var svg = d3.select("#segment").append("svg").attr("width", 800).attr("height", 200)
+
+svg.append('line')
+    .attr('x1', 10)
+    .attr('y1', 10)
+    .attr('x2', 700)
+    .attr('y2', 150)
+    .attr('stroke', 'black')
+    .attr('stroke-width', 2)
+
+
+
 
 
 /*
