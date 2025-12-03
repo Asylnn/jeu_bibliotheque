@@ -80,8 +80,6 @@ socket.on("erreur",
     }
 )
 
-socket.on("qqch", () => {})
-
 socket.on("liste joueurs", noms => {
     let elem=document.getElementById("joueurs")
     elem.textContent=noms.nom.toString()
@@ -90,6 +88,29 @@ socket.on("liste joueurs", noms => {
     listeJoueurs.innerHTML = `${noms.nom.length}/${noms.max}` 
 })
 
+socket.on("initialisation affichage", noeuds => {
+    console.log("ahsd")
+    noeuds = Object.values(noeuds)
+    let svg = d3.select("svg")
+    for (let i = 0; i < noeuds.length; i++) {
+        if(noeuds[i].book != undefined)
+            noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
+        console.log("ahs")
+        console.log(svg)
+        displayNode(svg, noeuds[i].coordonnees, noeuds[i])
+    }
+})
+
+socket.on("liste noeuds", noeuds => {
+    for (let i = 0; i < noeuds.length; i++) {
+        const group = d3.select(`#${noeuds[i].id}`).parent
+        group.remove(`#b${noeuds[i.id]}`)
+        displayBook(group, )
+        
+    }
+})
+
+
 socket.emit("envoie message chat", {message:"Salut ca va"})
 
 
@@ -97,7 +118,7 @@ socket.emit("envoie message chat", {message:"Salut ca va"})
 
 
 //PARTIE D3
-function displayBook(elem, coordinate, book)
+function displayBook(elem, coordinate, book, id)
 {
     console.log(d3.select("svg"))
     let bookWidth = 25
@@ -108,6 +129,7 @@ function displayBook(elem, coordinate, book)
         .attr("stroke", "black")
         .attr("stroke-width", 4)
         .attr("fill", book.getColor())
+        .attr("id", `b${id}`)
         .append("title")
         .html(book.titre)
 }
@@ -127,8 +149,11 @@ function displayNode(elem, coordinate, node)
         .attr("fill", "white")
         .attr("id", node.id)
         //.attr("id", "b")
-        .on("click", function(d) {  
-            console.log(d.target)})
+        .on("click", (node) => {
+            console.log(node)
+            console.log(node.target.id)
+            socket.emit("selection noeud", node.target.id)
+        })
 }
 
 function createBookSupport(nodes)
@@ -180,10 +205,10 @@ function createBookSupport2(nodes)
     for(let i = 0; i < /*jsonBooks.length*/ 2; i++){
         displayBook(d3.select("svg"), [32*(i+1),200], jsonBooks[i])
     }
-    nodes1 = [{id:"40", book:jsonBooks[0]}, {id:"41", book:jsonBooks[1]}, {id:"42", book:jsonBooks[2]}]
+    /*nodes1 = [{id:"40", book:jsonBooks[0]}, {id:"41", book:jsonBooks[1]}, {id:"42", book:jsonBooks[2]}]
     nodes2 = [{id:"43", book:undefined}, {id:"44", book:undefined}, {id:"45", book:undefined}]
     createBookSupport(nodes1)
-    createBookSupport2(nodes2)
+    createBookSupport2(nodes2)*/
 })()
 
 
@@ -194,7 +219,7 @@ function createBookSupport2(nodes)
 /*
 function creeHexagone(rayon) {
     var points = new Array();
-    for (var i = 0; i < 6; ++i) {
+    for (var i = 0; i < 6; ++i) { 
     var angle = i * Math.PI / 3;
     var x = Math.sin(angle) * rayon;
     var y = -Math.cos(angle) * rayon;

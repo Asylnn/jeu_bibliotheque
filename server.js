@@ -1,4 +1,6 @@
 const express = require('express')
+const books = require('./public/books.json')
+const Book = require('./public/book.js')
 const app = express()
 app.use(express.static('public'))
 const http = require('http')
@@ -17,10 +19,25 @@ class Joueur{
     constructor(socketID, nom){
         this.socketID=socketID;
         this.nom=nom;
+        this.selectionNoeud=undefined;
     }
 }
 
 let dict_joueurs={}
+let dict_noeuds={
+    "n1":{"id":"n1", "book":books[0], "coordonnees":[100, 100]},
+    "n2":{"id":"n2", "book":undefined, "coordonnees":[200, 100]},
+    "n40":{"id":"n40", "book":undefined, "coordonnees":[100, 300]},
+    "n41":{"id":"n41", "book":undefined, "coordonnees":[150, 300]},
+    "n42":{"id":"n42", "book":undefined, "coordonnees":[200, 300]},
+}
+
+/*
+
+
+*/
+
+
 let nbJoueursMax=4
 
 
@@ -66,6 +83,11 @@ io.on("connect", (socket) => {
         
     })
     socket.emit("liste joueurs", getNoms())
+    setTimeout(() => {
+        console.log("heyy")
+        socket.emit("initialisation affichage", dict_noeuds)
+    }, 200)
+    
     
 
     socket.on("sortie", () => {console.log("message sortie reçu")
@@ -102,11 +124,25 @@ io.on("connect", (socket) => {
 
         dict_joueurs[socket.id]= new Joueur(socket.id, nom)
         io.emit("liste joueurs", getNoms())
-        
-        
-        
     })
 
+    socket.on("selection noeud", id => {
+        console.log("id : " + id)
+        console.log("avant")
+        
+        console.log(dict_joueurs[socket.id])
+        if(dict_joueurs[socket.id].selectionNoeud == undefined && dict_noeuds[id].book != undefined)
+            dict_joueurs[socket.id].selectionNoeud = id
+        else {
+            dict_noeuds[id].book = dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book
+            dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book = undefined
+            socket.emit("confirmation mouvement livre")
+            io.emit("liste noeuds", dict_noeuds)
+            dict_joueurs[socket.id].selectionNoeud = undefined
+        }
+        console.log("apres")
+        console.log(dict_joueurs[socket.id])
+    })
     
 
     socket.on("message", (arg) => 
