@@ -133,7 +133,7 @@ function displayBook(coordinate, book)
 
     console.log(jsonBooks[10].getColor())
 
-    for(let i = 0; i < jsonBooks.length; i++){
+    for(let i = 0; i < 12; i++){
         displayBook([32*(i+1),200], jsonBooks[i])
     }
     
@@ -142,15 +142,88 @@ function displayBook(coordinate, book)
 
 //etageres
 
-var svg = d3.select("#segment").append("svg").attr("width", 800).attr("height", 200)
+setTimeout(()=> {
 
+var svg = d3.select("svg")
 svg.append('line')
     .attr('x1', 10)
-    .attr('y1', 10)
-    .attr('x2', 700)
-    .attr('y2', 150)
-    .attr('stroke', 'black')
-    .attr('stroke-width', 2)
+    .attr('y1', 50)
+    .attr('x2', 450)
+    .attr('y2', 50)
+    .attr('stroke', '#54301D')
+    .attr('stroke-width', 8)
+
+}, 200)
+
+setTimeout(()=> {
+
+var svg = d3.select("svg")
+svg.append('line')
+    .attr('x1', 10)
+    .attr('y1', 200)
+    .attr('x2', 450)
+    .attr('y2', 200)
+    .attr('stroke', '#54301D')
+    .attr('stroke-width', 8)
+
+}, 200)
+
+setTimeout(()=> {
+
+var svg = d3.select("svg")
+svg.append('line')
+    .attr('x1', 10)
+    .attr('y1', 350)
+    .attr('x2', 450)
+    .attr('y2', 350)
+    .attr('stroke', '#54301D')
+    .attr('stroke-width', 8)
+
+}, 200)
+
+setTimeout(()=> {
+
+var svg = d3.select("svg")
+svg.append('line')
+    .attr('x1', 10)
+    .attr('y1', 500)
+    .attr('x2', 450)
+    .attr('y2', 500)
+    .attr('stroke', '#54301D')
+    .attr('stroke-width', 8)
+
+}, 200)
+
+
+
+
+setTimeout(()=> {
+
+var svg = d3.select("svg")
+svg.append('line')
+    .attr('x1', 10)
+    .attr('y1', 46)
+    .attr('x2', 10)
+    .attr('y2', 640)
+    .attr('stroke', '#54301D')
+    .attr('stroke-width', 8)
+
+}, 200)
+
+
+setTimeout(()=> {
+
+var svg = d3.select("svg")
+svg.append('line')
+    .attr('x1', 450)
+    .attr('y1', 46)
+    .attr('x2', 450)
+    .attr('y2', 640)
+    .attr('stroke', '#54301D')
+    .attr('stroke-width', 8)
+
+}, 200)
+
 
 
 
