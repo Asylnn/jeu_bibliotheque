@@ -97,25 +97,75 @@ socket.emit("envoie message chat", {message:"Salut ca va"})
 
 
 //PARTIE D3
-
-
-function displayBook(coordinate, book)
+function displayBook(elem, coordinate, book)
 {
+    console.log(d3.select("svg"))
     let bookWidth = 25
-    console.log(book.title)
     let path = `M${coordinate[0]} ${coordinate[1]} L${coordinate[0]+bookWidth} ${coordinate[1]} L${coordinate[0]+bookWidth} ${coordinate[1]-book.getSize()} L${coordinate[0]} ${coordinate[1]-book.getSize()} Z`
-    d3.select("svg")   
+    elem
         .append("path")
         .attr("d", path)
         .attr("stroke", "black")
         .attr("stroke-width", 4)
         .attr("fill", book.getColor())
+        .append("title")
+        .html(book.titre)
+}
+
+function displayNode(elem, coordinate, node)
+{
+    if(node.book != null)
+        displayBook(elem, coordinate, node.book)
+
+    elem
+        .append("circle")
+        .attr("cx", coordinate[0])
+        .attr("cy", coordinate[1])
+        .attr("r", 10)
+        .attr("stroke", "black")
+        .attr("stroke-width", 4)
+        .attr("fill", "white")
+        .attr("id", node.id)
         //.attr("id", "b")
         .on("click", function(d) {  
             console.log(d.target)})
-        .append("title")
-        .html(book.titre)
+}
 
+function createBookSupport(nodes)
+{
+    let bookSupportSVGGroup = d3.select("svg").append("g")
+    
+    let path = `M100 400 L300 400 L 300 450 L100 450 Z`
+    bookSupportSVGGroup
+        .append("path")
+        .attr("d", path)
+        .attr("stroke", "yellow")
+        .attr("stroke-width", 4)
+        .attr("fill", "yellow")
+        /*.append("animate")
+        .attr("dur", 20)
+        .attr("path", "M20 20 L20 2000")*/
+
+    for (let i = 0; i < 3; i++) {
+        displayNode(bookSupportSVGGroup, [120 + i*70, 400], nodes[i])
+    }
+}
+
+function createBookSupport2(nodes)
+{
+    let bookSupportSVGGroup = d3.select("svg").append("g")
+    
+    let path = `M500 400 L700 400 L700 450 L500 450 Z`
+    bookSupportSVGGroup
+        .append("path")
+        .attr("d", path)
+        .attr("stroke", "yellow")
+        .attr("stroke-width", 4)
+        .attr("fill", "yellow")
+
+    for (let i = 0; i < 3; i++) {
+        displayNode(bookSupportSVGGroup, [520 + i*70, 400], nodes[i])
+    }
 }
 
 //TEST D3
@@ -123,42 +173,25 @@ function displayBook(coordinate, book)
 (async () => {
     let books = await fetch("./books.json")
     let jsonBooks = await books.json()
-    console.log(jsonBooks)
-    console.log(jsonBooks.length)
     for(let i = 0; i < jsonBooks.length; i++)
     {
         jsonBooks[i] = Object.assign(new Book(), jsonBooks[i])
     }
-    console.log(jsonBooks)
-
-    console.log(jsonBooks[10].getColor())
-
-    for(let i = 0; i < jsonBooks.length; i++){
-        displayBook([32*(i+1),200], jsonBooks[i])
+    for(let i = 0; i < /*jsonBooks.length*/ 2; i++){
+        displayBook(d3.select("svg"), [32*(i+1),200], jsonBooks[i])
     }
-    
-    console.log("ahhhhh")
+    nodes1 = [{id:"40", book:jsonBooks[0]}, {id:"41", book:jsonBooks[1]}, {id:"42", book:jsonBooks[2]}]
+    nodes2 = [{id:"43", book:undefined}, {id:"44", book:undefined}, {id:"45", book:undefined}]
+    createBookSupport(nodes1)
+    createBookSupport2(nodes2)
 })()
 
-//etageres
-
-var svg = d3.select("#segment").append("svg").attr("width", 800).attr("height", 200)
-
-svg.append('line')
-    .attr('x1', 10)
-    .attr('y1', 10)
-    .attr('x2', 700)
-    .attr('y2', 150)
-    .attr('stroke', 'black')
-    .attr('stroke-width', 2)
 
 
 
 
 
 /*
-
-
 function creeHexagone(rayon) {
     var points = new Array();
     for (var i = 0; i < 6; ++i) {
