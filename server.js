@@ -83,12 +83,7 @@ io.on("connect", (socket) => {
         
     })
     socket.emit("liste joueurs", getNoms())
-    setTimeout(() => {
-        console.log("heyy")
-        socket.emit("initialisation affichage", dict_noeuds)
-    }, 200)
-    
-    
+
 
     socket.on("sortie", () => {console.log("message sortie reçu")
         delete dict_joueurs[socket.id]
@@ -124,6 +119,7 @@ io.on("connect", (socket) => {
 
         dict_joueurs[socket.id]= new Joueur(socket.id, nom)
         io.emit("liste joueurs", getNoms())
+        socket.emit("initialisation affichage", dict_noeuds)
     })
 
     socket.on("selection noeud", id => {
@@ -131,6 +127,8 @@ io.on("connect", (socket) => {
         console.log("avant")
         
         console.log(dict_joueurs[socket.id])
+        if(dict_joueurs[socket.id].selectionNoeud == undefined && dict_noeuds[id].book == undefined)
+            return;
         if(dict_joueurs[socket.id].selectionNoeud == undefined && dict_noeuds[id].book != undefined)
             dict_joueurs[socket.id].selectionNoeud = id
         else {

@@ -102,11 +102,36 @@ socket.on("initialisation affichage", noeuds => {
 })
 
 socket.on("liste noeuds", noeuds => {
+    noeuds = Object.values(noeuds)
+    console.log("liste noeuds")
+    console.log(noeuds)
+    
     for (let i = 0; i < noeuds.length; i++) {
-        const group = d3.select(`#${noeuds[i].id}`).parent
-        group.remove(`#b${noeuds[i.id]}`)
-        displayBook(group, )
+        if(noeuds[i].book != undefined)
+        {
+            console.log(noeuds[i].book)
+            noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
+            console.log(noeuds[i].book)
         
+            
+            //console.log(d3.select(`#${noeuds[i].id}`))
+            //console.log(`#${noeuds[i].id}`)
+            //console.log(d3.select(`#${noeuds[i].id}`)._groups[0][0])
+            console.log(d3.select(`#${noeuds[i].id}`).node().parentNode)
+            //const group = d3.select(`#${noeuds[i].id}`).parent
+            const group = d3.select(d3.select(`#${noeuds[i].id}`).node().parentNode)
+            //console.log(group)
+            console.log(`#b${noeuds[i].id}`)
+
+            console.log(d3.select(`#b${noeuds[i].id}`))
+            
+            //console.log(group)
+            displayBook(d3.select("svg"), noeuds[i].coordonnees, noeuds[i].book, noeuds[i].id)
+        }
+        else
+        {
+            d3.select(`#b${noeuds[i].id}`).remove()
+        }
     }
 })
 
@@ -120,7 +145,7 @@ socket.emit("envoie message chat", {message:"Salut ca va"})
 //PARTIE D3
 function displayBook(elem, coordinate, book, id)
 {
-    console.log(d3.select("svg"))
+    console.log(elem)
     let bookWidth = 25
     let path = `M${coordinate[0]} ${coordinate[1]} L${coordinate[0]+bookWidth} ${coordinate[1]} L${coordinate[0]+bookWidth} ${coordinate[1]-book.getSize()} L${coordinate[0]} ${coordinate[1]-book.getSize()} Z`
     elem
@@ -137,7 +162,7 @@ function displayBook(elem, coordinate, book, id)
 function displayNode(elem, coordinate, node)
 {
     if(node.book != null)
-        displayBook(elem, coordinate, node.book)
+        displayBook(elem, coordinate, node.book, node.id)
 
     elem
         .append("circle")
