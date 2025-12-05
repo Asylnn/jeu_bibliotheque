@@ -150,6 +150,7 @@ function displayBook(elem, coordinate, book, id)
     let path = `M${coordinate[0]} ${coordinate[1]} L${coordinate[0]+bookWidth} ${coordinate[1]} L${coordinate[0]+bookWidth} ${coordinate[1]-book.getSize()} L${coordinate[0]} ${coordinate[1]-book.getSize()} Z`
     elem
         .append("path")
+        .lower()
         .attr("d", path)
         .attr("stroke", "black")
         .attr("stroke-width", 4)
