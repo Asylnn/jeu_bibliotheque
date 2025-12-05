@@ -88,44 +88,30 @@ socket.on("liste joueurs", noms => {
     listeJoueurs.innerHTML = `${noms.nom.length}/${noms.max}` 
 })
 
+//Initialisation de l'affichage lorsque la partie commence
 socket.on("initialisation affichage", noeuds => {
-    console.log("ahsd")
-    noeuds = Object.values(noeuds)
+    noeuds = Object.values(noeuds) //Transforme le dictionnaire en tableau
     let svg = d3.select("svg")
     for (let i = 0; i < noeuds.length; i++) {
         if(noeuds[i].book != undefined)
             noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
-        console.log("ahs")
-        console.log(svg)
+            //Fait en sorte que les objets livres soit de la classe livre
         displayNode(svg, noeuds[i].coordonnees, noeuds[i])
     }
 })
 
+
+//Lorsque le client recoit la liste de tout les noeuds (lorsque un joueur déplace un livre) et met a jour l'affichage
 socket.on("liste noeuds", noeuds => {
-    noeuds = Object.values(noeuds)
-    console.log("liste noeuds")
-    console.log(noeuds)
+    noeuds = Object.values(noeuds) //Transforme le dictionnaire en tableau
     
     for (let i = 0; i < noeuds.length; i++) {
         if(noeuds[i].book != undefined)
         {
-            console.log(noeuds[i].book)
+            //Fait en sorte que les objets livres soit de la classe livre
             noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
-            console.log(noeuds[i].book)
-        
-            
-            //console.log(d3.select(`#${noeuds[i].id}`))
-            //console.log(`#${noeuds[i].id}`)
-            //console.log(d3.select(`#${noeuds[i].id}`)._groups[0][0])
-            console.log(d3.select(`#${noeuds[i].id}`).node().parentNode)
-            //const group = d3.select(`#${noeuds[i].id}`).parent
+            //selectionne l'element parent au noeud
             const group = d3.select(d3.select(`#${noeuds[i].id}`).node().parentNode)
-            //console.log(group)
-            console.log(`#b${noeuds[i].id}`)
-
-            console.log(d3.select(`#b${noeuds[i].id}`))
-            
-            //console.log(group)
             displayBook(d3.select("svg"), noeuds[i].coordonnees, noeuds[i].book, noeuds[i].id)
         }
         else

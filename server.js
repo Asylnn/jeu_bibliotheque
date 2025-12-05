@@ -123,32 +123,34 @@ io.on("connect", (socket) => {
     })
 
     socket.on("selection noeud", id => {
-        console.log("id : " + id)
-        console.log("avant")
-        
-        console.log(dict_joueurs[socket.id])
+        //Si le joueur n'a pas de noeuds selectionné et qu'il a selectionné un noeud qui n'a pas de livre, alors il ne ce passe rien
         if(dict_joueurs[socket.id].selectionNoeud == undefined && dict_noeuds[id].book == undefined)
             return;
+        
+        //Si le joueur a un noeud selectionné et que le noeud selectionné à déjà un livre, alors rien ne ce passe
+        if(dict_joueurs[socket.id].selectionNoeud != undefined && dict_noeuds[id].book != undefined)
+            return;
+
+        //Si le joueur n'a pas de noeuds selectionné et qu'il a selectionné un noeud qui a un livre, alors il selectionne ce noeud
         if(dict_joueurs[socket.id].selectionNoeud == undefined && dict_noeuds[id].book != undefined)
             dict_joueurs[socket.id].selectionNoeud = id
         else {
+            //Sinon on deplace le livre au nouveau noeud
             dict_noeuds[id].book = dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book
             dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book = undefined
-            socket.emit("confirmation mouvement livre")
+            //socket.emit("confirmation mouvement livre")
+            //On met a jour l'affichage de tout les noeuds de tout les clients
             io.emit("liste noeuds", dict_noeuds)
             dict_joueurs[socket.id].selectionNoeud = undefined
         }
-        console.log("apres")
-        console.log(dict_joueurs[socket.id])
     })
     
 
     socket.on("message", (arg) => 
     {
 
-        if(arg==""){
+        if(arg == "")
             return;
-        }
 
         console.log(arg)
         console.log(dict_joueurs)
