@@ -6,7 +6,7 @@ app.use(express.static('public'))
 const http = require('http')
 const server = http.createServer(app)
 const io = new require("socket.io")(server)
-
+const counterNoeudsChariot = 0
 server.listen(8887, () => {
     console.log("listen on port 8887")
 })
@@ -119,10 +119,16 @@ io.on("connect", (socket) => {
 
         dict_joueurs[socket.id]= new Joueur(socket.id, nom)
         io.emit("liste joueurs", getNoms())
-        socket.emit("initialisation affichage", dict_noeuds)
+    })
+
+    socket.on("commencer partie", () => {
+        io.emit("initialisation affichage", dict_noeuds)
     })
 
     socket.on("selection noeud", id => {
+        //Si le joueur n'est pas dans la partie alors il ne ce passe rien
+        if(dict_joueurs[socket.id] == undefined)
+            return;
         //Si le joueur n'a pas de noeuds selectionné et qu'il a selectionné un noeud qui n'a pas de livre, alors il ne ce passe rien
         if(dict_joueurs[socket.id].selectionNoeud == undefined && dict_noeuds[id].book == undefined)
             return;

@@ -35,7 +35,7 @@ function seDeconnecterDeLaPartie(){
     let input=document.getElementById("nom");
     socket.emit("sortie", input.value);
     console.log("sortie de la partie");
-     console.log("bien entree")
+    console.log("bien entree")
     let messagerie=document.getElementById("messagerie")
     let elem=document.getElementById("entree-nom");
     elem.style.display = "block"
@@ -47,7 +47,12 @@ function envoyerUnMessage(){
     socket.emit("message", input.value);
     input.value=""
     console.log("message envoyé")
+}
 
+
+function commencerLaPartie()
+{
+    socket.emit("commencer partie")
 }
 
 socket.on("entree dans la partie", () => {
@@ -84,8 +89,15 @@ socket.on("liste joueurs", noms => {
     let elem=document.getElementById("joueurs")
     elem.textContent=noms.nom.toString()
     console.log("liste noms : " +  noms.nom)
+
     let listeJoueurs=document.getElementById("nombreJoueurs")
-    listeJoueurs.innerHTML = `${noms.nom.length}/${noms.max}` 
+    listeJoueurs.innerHTML = `${noms.nom.length}/${noms.max}`
+    
+    let boutonCommencer = document.getElementById("commencer")
+    if(noms.nom.length >= 2)
+        boutonCommencer.style.display = "inline"
+    else
+        boutonCommencer.style.display = "none"
 })
 
 //Initialisation de l'affichage lorsque la partie commence
@@ -122,7 +134,7 @@ socket.on("liste noeuds", noeuds => {
 })
 
 
-socket.emit("envoie message chat", {message:"Salut ca va"})
+//socket.emit("envoie message chat", {message:"Salut ca va"})
 
 
 
@@ -188,7 +200,7 @@ function createBookSupport(nodes)
     }
 }
 
-function createBookSupport2(nodes)
+function createChariot(nodes)
 {
     let bookSupportSVGGroup = d3.select("svg").append("g")
     
@@ -200,7 +212,7 @@ function createBookSupport2(nodes)
         .attr("stroke-width", 4)
         .attr("fill", "yellow")
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < nodes.length; i++) {
         displayNode(bookSupportSVGGroup, [520 + i*70, 400], nodes[i])
     }
 }
