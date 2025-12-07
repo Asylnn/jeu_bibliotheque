@@ -118,6 +118,8 @@ socket.on("liste noeuds", noeuds => {
     noeuds = Object.values(noeuds) //Transforme le dictionnaire en tableau
     
     for (let i = 0; i < noeuds.length; i++) {
+        console.log(`#${noeuds[i].id}`)
+        console.log(d3.select(`#${noeuds[i].id}`))
         if(noeuds[i].book != undefined)
         {
             //Fait en sorte que les objets livres soit de la classe livre
@@ -133,6 +135,13 @@ socket.on("liste noeuds", noeuds => {
     }
 })
 
+socket.on("creer chariot", (noeuds) => {
+    for (let i = 0; i < noeuds.length; i++) {
+        if(noeuds[i].book != undefined)
+            noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
+    }
+    createChariot(noeuds)
+})
 
 //socket.emit("envoie message chat", {message:"Salut ca va"})
 
@@ -174,13 +183,11 @@ function displayNode(elem, coordinate, node)
         .attr("id", node.id)
         //.attr("id", "b")
         .on("click", (node) => {
-            console.log(node)
-            console.log(node.target.id)
             socket.emit("selection noeud", node.target.id)
         })
 }
 
-function createBookSupport(nodes)
+/*function createBookSupport(nodes)
 {
     let bookSupportSVGGroup = d3.select("svg").append("g")
     
@@ -191,14 +198,12 @@ function createBookSupport(nodes)
         .attr("stroke", "yellow")
         .attr("stroke-width", 4)
         .attr("fill", "yellow")
-        /*.append("animate")
-        .attr("dur", 20)
-        .attr("path", "M20 20 L20 2000")*/
+        
 
     for (let i = 0; i < 3; i++) {
-        displayNode(bookSupportSVGGroup, [120 + i*70, 400], nodes[i])
+        displayNode(bookSupportSVGGroup, [120 + i*30, 400], nodes[i])
     }
-}
+}*/
 
 function createChariot(nodes)
 {
@@ -211,9 +216,33 @@ function createChariot(nodes)
         .attr("stroke", "yellow")
         .attr("stroke-width", 4)
         .attr("fill", "yellow")
+    bookSupportSVGGroup
+        .append("animateTransform")
+        .attr("attributeName", "transform")
+        .attr("attributeType", "XML")
+        .attr("type", "translate")
+        .attr("from", 0)
+        .attr("to", 1000)
+        .attr("begin", 0)
+        .attr("dur", 20)
+        .attr("repeatCount", 1)
+        .attr("fill", "freeze")
+
+
+        /*<animateTransform
+      attributeName="transform"
+      attributeType="XML"
+      type="translate"
+      from="0"
+      to="20"
+      begin="0.5s"
+      dur="0.2s"
+      repeatCount="1"
+      fill="freeze"
+      additive="sum"/>*/
 
     for (let i = 0; i < nodes.length; i++) {
-        displayNode(bookSupportSVGGroup, [520 + i*70, 400], nodes[i])
+        displayNode(bookSupportSVGGroup, [510 + i*40, 400], nodes[i])
     }
 }
 

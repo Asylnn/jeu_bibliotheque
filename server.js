@@ -6,7 +6,7 @@ app.use(express.static('public'))
 const http = require('http')
 const server = http.createServer(app)
 const io = new require("socket.io")(server)
-const counterNoeudsChariot = 0
+let counterNoeudsChariot = 0
 server.listen(8887, () => {
     console.log("listen on port 8887")
 })
@@ -123,6 +123,21 @@ io.on("connect", (socket) => {
 
     socket.on("commencer partie", () => {
         io.emit("initialisation affichage", dict_noeuds)
+
+        let noeudsChariot = []
+        for(let i = 0; i < 5; i++)
+        {
+            const id = `c${counterNoeudsChariot}`
+            const noeud = {
+                "id":id,
+                "book":books[Math.floor(Math.random()* books.length)],
+                "coordonnees":[0, 0]
+            }
+            noeudsChariot.push(noeud)
+            dict_noeuds[id] = noeud
+            counterNoeudsChariot++  
+        }
+        io.emit("creer chariot", noeudsChariot)
     })
 
     socket.on("selection noeud", id => {
