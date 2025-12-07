@@ -3,6 +3,8 @@
 console.log("hello world!")
 
 let socket = io()
+let partieEnCours = false
+
 socket.emit("ping")
 socket.on("pong", data => {
     console.log("recu pong")
@@ -49,11 +51,44 @@ function envoyerUnMessage(){
     console.log("message envoyé")
 }
 
+function testAffichageBoutonCommencerTerminer(nbJoueurs)
+{
+    console.log("test affichage")
+    console.log(partieEnCours)
+    let boutonCommencer = document.getElementById("commencer")
+    let boutonTerminer = document.getElementById("terminer")
+    if(partieEnCours){
+        boutonTerminer.style.display = "inline"
+        boutonCommencer.style.display = "none"
+    }
+    else
+    {
+        boutonTerminer.style.display = "none"
+        if(nbJoueurs >= 2)
+            boutonCommencer.style.display = "inline"
+        else
+            boutonCommencer.style.display = "none"
+    }
+    
+}
 
 function commencerLaPartie()
 {
+    partieEnCours = true
+    testAffichageBoutonCommencerTerminer(2)
     socket.emit("commencer partie")
+    
 }
+
+function terminerLaPartie()
+{
+    partieEnCours = false
+    testAffichageBoutonCommencerTerminer(0)
+    socket.emit("terminer partie")
+    let svg = d3.select("svg")
+    svg.selectAll("*").remove();
+}
+
 
 socket.on("entree dans la partie", () => {
     console.log("bien entree")
@@ -64,6 +99,16 @@ socket.on("entree dans la partie", () => {
 
 })
 
+socket.on("début partie", () => {
+    document.getElementById("commencer").style.display = "none"
+    document.getElementById("terminer").style.display = "inline"
+})
+
+
+socket.on("fin partie", () => {
+    document.getElementById("commencer").style.display = "inline"
+    document.getElementById("terminer").style.display = "none"
+})
 
 
 socket.on("envoie message client", message => 
@@ -98,12 +143,9 @@ socket.on("liste joueurs", noms => {
 
     let listeJoueurs=document.getElementById("nombreJoueurs")
     listeJoueurs.innerHTML = `${noms.nom.length}/${noms.max}`
+    testAffichageBoutonCommencerTerminer(noms.nom.length)
     
-    let boutonCommencer = document.getElementById("commencer")
-    if(noms.nom.length >= 2)
-        boutonCommencer.style.display = "inline"
-    else
-        boutonCommencer.style.display = "none"
+    
 })
 
 //Initialisation de l'affichage lorsque la partie commence
