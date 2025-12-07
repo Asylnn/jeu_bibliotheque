@@ -124,19 +124,16 @@ socket.on("liste noeuds", noeuds => {
     noeuds = Object.values(noeuds) //Transforme le dictionnaire en tableau
     
     for (let i = 0; i < noeuds.length; i++) {
-        console.log(`#${noeuds[i].id}`)
-        console.log(d3.select(`#${noeuds[i].id}`))
+        //enlève tout les livres
+        d3.select(`#b${noeuds[i].id}`).remove()
         if(noeuds[i].book != undefined)
         {
             //Fait en sorte que les objets livres soit de la classe livre
             noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
             //selectionne l'element parent au noeud
             const group = d3.select(d3.select(`#${noeuds[i].id}`).node().parentNode)
-            displayBook(d3.select("svg"), noeuds[i].coordonnees, noeuds[i].book, noeuds[i].id)
-        }
-        else
-        {
-            d3.select(`#b${noeuds[i].id}`).remove()
+            //affiche les livres présent
+            displayBook(group, noeuds[i].coordonnees, noeuds[i].book, noeuds[i].id)
         }
     }
 })
@@ -156,6 +153,9 @@ socket.on("creer chariot", (noeuds) => {
 function displayBook(elem, coordinate, book, id)
 {
     console.log(elem)
+    console.log(book)
+    console.log(id)
+    console.log(coordinate)
     let bookWidth = 25
     let path = `M${coordinate[0]} ${coordinate[1]} L${coordinate[0]+bookWidth} ${coordinate[1]} L${coordinate[0]+bookWidth} ${coordinate[1]-book.getSize()} L${coordinate[0]} ${coordinate[1]-book.getSize()} Z`
     elem
@@ -245,7 +245,7 @@ function createChariot(nodes)
       additive="sum"/>*/
 
     for (let i = 0; i < nodes.length; i++) {
-        displayNode(bookSupportSVGGroup, [510 + i*40, 400], nodes[i])
+        displayNode(bookSupportSVGGroup, nodes[i].coordonnees, nodes[i])
     }
 }
 
