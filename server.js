@@ -80,7 +80,6 @@ io.on("connect", (socket) => {
     socket.on("ping", () => {
         console.log("pong")
         socket.emit("pong")
-        
     })
     socket.emit("liste joueurs", getNoms())
 
@@ -141,9 +140,11 @@ io.on("connect", (socket) => {
     })
 
     socket.on("selection noeud", id => {
+
         //Si le joueur n'est pas dans la partie alors il ne ce passe rien
         if(dict_joueurs[socket.id] == undefined)
             return;
+
         //Si le joueur n'a pas de noeuds selectionné et qu'il a selectionné un noeud qui n'a pas de livre, alors il ne ce passe rien
         if(dict_joueurs[socket.id].selectionNoeud == undefined && dict_noeuds[id].book == undefined)
             return;
