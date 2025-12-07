@@ -35,7 +35,7 @@ function seDeconnecterDeLaPartie(){
     let input=document.getElementById("nom");
     socket.emit("sortie", input.value);
     console.log("sortie de la partie");
-     console.log("bien entree")
+    console.log("bien entree")
     let messagerie=document.getElementById("messagerie")
     let elem=document.getElementById("entree-nom");
     elem.style.display = "block"
@@ -47,7 +47,12 @@ function envoyerUnMessage(){
     socket.emit("message", input.value);
     input.value=""
     console.log("message envoyé")
+}
 
+
+function commencerLaPartie()
+{
+    socket.emit("commencer partie")
 }
 
 socket.on("entree dans la partie", () => {
@@ -84,48 +89,43 @@ socket.on("liste joueurs", noms => {
     let elem=document.getElementById("joueurs")
     elem.textContent=noms.nom.toString()
     console.log("liste noms : " +  noms.nom)
+
     let listeJoueurs=document.getElementById("nombreJoueurs")
-    listeJoueurs.innerHTML = `${noms.nom.length}/${noms.max}` 
+    listeJoueurs.innerHTML = `${noms.nom.length}/${noms.max}`
+    
+    let boutonCommencer = document.getElementById("commencer")
+    if(noms.nom.length >= 2)
+        boutonCommencer.style.display = "inline"
+    else
+        boutonCommencer.style.display = "none"
 })
 
+//Initialisation de l'affichage lorsque la partie commence
 socket.on("initialisation affichage", noeuds => {
-    console.log("ahsd")
-    noeuds = Object.values(noeuds)
+    noeuds = Object.values(noeuds) //Transforme le dictionnaire en tableau
     let svg = d3.select("svg")
     for (let i = 0; i < noeuds.length; i++) {
         if(noeuds[i].book != undefined)
             noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
-        console.log("ahs")
-        console.log(svg)
+            //Fait en sorte que les objets livres soit de la classe livre
         displayNode(svg, noeuds[i].coordonnees, noeuds[i])
     }
 })
 
+
+//Lorsque le client recoit la liste de tout les noeuds (lorsque un joueur déplace un livre) et met a jour l'affichage
 socket.on("liste noeuds", noeuds => {
-    noeuds = Object.values(noeuds)
-    console.log("liste noeuds")
-    console.log(noeuds)
+    noeuds = Object.values(noeuds) //Transforme le dictionnaire en tableau
     
     for (let i = 0; i < noeuds.length; i++) {
+        console.log(`#${noeuds[i].id}`)
+        console.log(d3.select(`#${noeuds[i].id}`))
         if(noeuds[i].book != undefined)
         {
-            console.log(noeuds[i].book)
+            //Fait en sorte que les objets livres soit de la classe livre
             noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
-            console.log(noeuds[i].book)
-        
-            
-            //console.log(d3.select(`#${noeuds[i].id}`))
-            //console.log(`#${noeuds[i].id}`)
-            //console.log(d3.select(`#${noeuds[i].id}`)._groups[0][0])
-            console.log(d3.select(`#${noeuds[i].id}`).node().parentNode)
-            //const group = d3.select(`#${noeuds[i].id}`).parent
+            //selectionne l'element parent au noeud
             const group = d3.select(d3.select(`#${noeuds[i].id}`).node().parentNode)
-            //console.log(group)
-            console.log(`#b${noeuds[i].id}`)
-
-            console.log(d3.select(`#b${noeuds[i].id}`))
-            
-            //console.log(group)
             displayBook(d3.select("svg"), noeuds[i].coordonnees, noeuds[i].book, noeuds[i].id)
         }
         else
@@ -135,11 +135,15 @@ socket.on("liste noeuds", noeuds => {
     }
 })
 
+socket.on("creer chariot", (noeuds) => {
+    for (let i = 0; i < noeuds.length; i++) {
+        if(noeuds[i].book != undefined)
+            noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
+    }
+    createChariot(noeuds)
+})
 
-socket.emit("envoie message chat", {message:"Salut ca va"})
-
-
-
+//socket.emit("envoie message chat", {message:"Salut ca va"})
 
 
 //PARTIE D3
@@ -176,13 +180,11 @@ function displayNode(elem, coordinate, node)
         .attr("id", node.id)
         //.attr("id", "b")
         .on("click", (node) => {
-            console.log(node)
-            console.log(node.target.id)
             socket.emit("selection noeud", node.target.id)
         })
 }
 
-function createBookSupport(nodes)
+/*function createBookSupport(nodes)
 {
     let bookSupportSVGGroup = d3.select("svg").append("g")
     
@@ -193,16 +195,14 @@ function createBookSupport(nodes)
         .attr("stroke", "yellow")
         .attr("stroke-width", 4)
         .attr("fill", "yellow")
-        /*.append("animate")
-        .attr("dur", 20)
-        .attr("path", "M20 20 L20 2000")*/
+        
 
     for (let i = 0; i < 3; i++) {
-        displayNode(bookSupportSVGGroup, [120 + i*70, 400], nodes[i])
+        displayNode(bookSupportSVGGroup, [120 + i*30, 400], nodes[i])
     }
-}
+}*/
 
-function createBookSupport2(nodes)
+function createChariot(nodes)
 {
     let bookSupportSVGGroup = d3.select("svg").append("g")
     
@@ -213,9 +213,33 @@ function createBookSupport2(nodes)
         .attr("stroke", "yellow")
         .attr("stroke-width", 4)
         .attr("fill", "yellow")
+    bookSupportSVGGroup
+        .append("animateTransform")
+        .attr("attributeName", "transform")
+        .attr("attributeType", "XML")
+        .attr("type", "translate")
+        .attr("from", 0)
+        .attr("to", 1000)
+        .attr("begin", 0)
+        .attr("dur", 20)
+        .attr("repeatCount", 1)
+        .attr("fill", "freeze")
 
-    for (let i = 0; i < 3; i++) {
-        displayNode(bookSupportSVGGroup, [520 + i*70, 400], nodes[i])
+
+        /*<animateTransform
+      attributeName="transform"
+      attributeType="XML"
+      type="translate"
+      from="0"
+      to="20"
+      begin="0.5s"
+      dur="0.2s"
+      repeatCount="1"
+      fill="freeze"
+      additive="sum"/>*/
+
+    for (let i = 0; i < nodes.length; i++) {
+        displayNode(bookSupportSVGGroup, [510 + i*40, 400], nodes[i])
     }
 }
 
@@ -233,45 +257,78 @@ function createBookSupport2(nodes)
     console.log(jsonBooks[10].getColor())
 
     for(let i = 0; i < 12; i++){
-        displayBook(d3.select("svg"), [32*(i+1),200], jsonBooks[i])
+        displayBook([32*(i+1),200], jsonBooks[i])
     }
     /*nodes1 = [{id:"40", book:jsonBooks[0]}, {id:"41", book:jsonBooks[1]}, {id:"42", book:jsonBooks[2]}]
     nodes2 = [{id:"43", book:undefined}, {id:"44", book:undefined}, {id:"45", book:undefined}]
-    /*createBookSupport(nodes1)
     createBookSupport(nodes1)
     createBookSupport2(nodes2)*/
 })()
 
 //etageres
 
-
-for(let i=0; i < 3; i++){
-
-let nb=540;
-let cmp=150;
 setTimeout(()=> {
-        for(let j=0; j < 4; j++){
 
 var svg = d3.select("svg")
 svg.append('line')
-    .attr('x1', 10+i*nb)
-    .attr('y1', 50+j*cmp)
-    .attr('x2', 450+i*nb)
-    .attr('y2', 50+j*cmp)
+    .attr('x1', 10)
+    .attr('y1', 50)
+    .attr('x2', 450)
+    .attr('y2', 50)
     .attr('stroke', '#54301D')
     .attr('stroke-width', 8)
-}
-}, 200)
 
-//lignes verticales
+}, 200)
 
 setTimeout(()=> {
 
 var svg = d3.select("svg")
 svg.append('line')
-    .attr('x1', 10+i*nb)
+    .attr('x1', 10)
+    .attr('y1', 200)
+    .attr('x2', 450)
+    .attr('y2', 200)
+    .attr('stroke', '#54301D')
+    .attr('stroke-width', 8)
+
+}, 200)
+
+setTimeout(()=> {
+
+var svg = d3.select("svg")
+svg.append('line')
+    .attr('x1', 10)
+    .attr('y1', 350)
+    .attr('x2', 450)
+    .attr('y2', 350)
+    .attr('stroke', '#54301D')
+    .attr('stroke-width', 8)
+
+}, 200)
+
+setTimeout(()=> {
+
+var svg = d3.select("svg")
+svg.append('line')
+    .attr('x1', 10)
+    .attr('y1', 500)
+    .attr('x2', 450)
+    .attr('y2', 500)
+    .attr('stroke', '#54301D')
+    .attr('stroke-width', 8)
+
+}, 200)
+
+
+
+
+setTimeout(()=> {
+
+var svg = d3.select("svg")
+svg.append('line')
+    .attr('x1', 10)
     .attr('y1', 46)
-    .attr('x2', 10+i*nb)
+    .attr('x2', 10)
     .attr('y2', 640)
     .attr('stroke', '#54301D')
     .attr('stroke-width', 8)
@@ -283,16 +340,18 @@ setTimeout(()=> {
 
 var svg = d3.select("svg")
 svg.append('line')
-    .attr('x1', 450+i*nb)
+    .attr('x1', 450)
     .attr('y1', 46)
-    .attr('x2', 450+i*nb)
+    .attr('x2', 450)
     .attr('y2', 640)
     .attr('stroke', '#54301D')
     .attr('stroke-width', 8)
 
 }, 200)
 
-}
+
+
+
 
 
 /*

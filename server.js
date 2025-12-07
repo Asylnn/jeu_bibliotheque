@@ -6,7 +6,7 @@ app.use(express.static('public'))
 const http = require('http')
 const server = http.createServer(app)
 const io = new require("socket.io")(server)
-
+let counterNoeudsChariot = 0
 server.listen(8887, () => {
     console.log("listen on port 8887")
 })
@@ -88,7 +88,6 @@ io.on("connect", (socket) => {
     socket.on("ping", () => {
         console.log("pong")
         socket.emit("pong")
-        
     })
     socket.emit("liste joueurs", getNoms())
 
@@ -127,22 +126,50 @@ io.on("connect", (socket) => {
 
         dict_joueurs[socket.id]= new Joueur(socket.id, nom)
         io.emit("liste joueurs", getNoms())
-        socket.emit("initialisation affichage", dict_noeuds)
+    })
+
+    socket.on("commencer partie", () => {
+        io.emit("initialisation affichage", dict_noeuds)
+
+        let noeudsChariot = []
+        for(let i = 0; i < 5; i++)
+        {
+            const id = `c${counterNoeudsChariot}`
+            const noeud = {
+                "id":id,
+                "book":books[Math.floor(Math.random()* books.length)],
+                "coordonnees":[0, 0]
+            }
+            noeudsChariot.push(noeud)
+            dict_noeuds[id] = noeud
+            counterNoeudsChariot++  
+        }
+        io.emit("creer chariot", noeudsChariot)
     })
 
     socket.on("selection noeud", id => {
-        console.log("id : " + id)
-        console.log("avant")
-        
-        console.log(dict_joueurs[socket.id])
+
+        //Si le joueur n'est pas dans la partie alors il ne ce passe rien
+        if(dict_joueurs[socket.id] == undefined)
+            return;
+
+        //Si le joueur n'a pas de noeuds selectionné et qu'il a selectionné un noeud qui n'a pas de livre, alors il ne ce passe rien
         if(dict_joueurs[socket.id].selectionNoeud == undefined && dict_noeuds[id].book == undefined)
             return;
+        
+        //Si le joueur a un noeud selectionné et que le noeud selectionné à déjà un livre, alors rien ne ce passe
+        if(dict_joueurs[socket.id].selectionNoeud != undefined && dict_noeuds[id].book != undefined)
+            return;
+
+        //Si le joueur n'a pas de noeuds selectionné et qu'il a selectionné un noeud qui a un livre, alors il selectionne ce noeud
         if(dict_joueurs[socket.id].selectionNoeud == undefined && dict_noeuds[id].book != undefined)
             dict_joueurs[socket.id].selectionNoeud = id
         else {
+            //Sinon on deplace le livre au nouveau noeud
             dict_noeuds[id].book = dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book
             dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book = undefined
-            socket.emit("confirmation mouvement livre")
+            //socket.emit("confirmation mouvement livre")
+            //On met a jour l'affichage de tout les noeuds de tout les clients
             io.emit("liste noeuds", dict_noeuds)
             dict_joueurs[socket.id].selectionNoeud = undefined
             const book = dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book
@@ -201,17 +228,14 @@ io.on("connect", (socket) => {
                 }
             }
         }
-        console.log("apres")
-        console.log(dict_joueurs[socket.id])
     })
     
 
     socket.on("message", (arg) => 
     {
 
-        if(arg==""){
+        if(arg == "")
             return;
-        }
 
         console.log(arg)
         console.log(dict_joueurs)
