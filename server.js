@@ -24,18 +24,26 @@ class Joueur{
 }
 
 let dict_joueurs={}
-let dict_noeuds={
-    "n1":{"id":"n1", "book":books[0], "coordonnees":[100, 100]},
-    "n2":{"id":"n2", "book":undefined, "coordonnees":[200, 100]},
-    "n40":{"id":"n40", "book":undefined, "coordonnees":[100, 300]},
-    "n41":{"id":"n41", "book":undefined, "coordonnees":[150, 300]},
-    "n42":{"id":"n42", "book":undefined, "coordonnees":[200, 300]},
+let dict_noeuds={}
+let nb=30;
+let cmp=150;
+let h=540;
+
+    //boucle
+for(let k=0; k < 3; k++){
+    for(let j=0; j < 3; j++){
+        for(let i=0; i < 14; i++){
+            const id =`n${j}${k}e${i}` 
+            dict_noeuds[id] = {
+                "id":id,
+                "book":undefined,
+                "coordonnees":[30+i*nb+k*h, 200+j*cmp]
+            }
+            
+        }
+    }
 }
 
-/*
-
-
-*/
 
 
 let nbJoueursMax=4
@@ -137,6 +145,61 @@ io.on("connect", (socket) => {
             socket.emit("confirmation mouvement livre")
             io.emit("liste noeuds", dict_noeuds)
             dict_joueurs[socket.id].selectionNoeud = undefined
+            const book = dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book
+            const tab=id.split("e")
+            const tabId=tab[1]
+            const tabIdSuiv=+tabId++
+            const tabIdPrec=+tabId--
+            nIdSuiv=`${tab[0]}e${tabIdSuiv}`
+            nIdPrec=`${tab[0]}e${tabIdPrec}`
+            const point=0
+            pointsDroit=verificationVoisinDroitApportePoints()
+            pointsGauche=verificationVoisinGaucheApportePoints()
+            totalPoints=pointsDroit+pointsGauche
+           
+            function verificationVoisinDroitApportePoints(id, point){
+                if(dict_noeuds[nIdSuiv] != null){
+                        const tab=id.split("e")
+                        const tabId=tab[1]
+                        const tabIdSuiv=+tabId++
+                        nIdSuiv=`${tab[0]}e${tabIdSuiv}`
+                    if (dict_noeuds[nId].book.genre == dict_noeuds[id].book.genre){
+                        point++
+                        point += verificationVoisinDroitApportePoints(nIdSuiv, point)
+                    }
+                    else if (dict_noeuds[nId].book.auteur == dict_noeuds[id].book.auteur){
+                        point++
+                        point += verificationVoisinDroitApportePoints(nIdSuiv, point)  
+                    }
+                    else if (dict_noeuds[nId].book.format == dict_noeuds[id].book.format){
+                        point++
+                        point += verificationVoisinDroitApportePoints(nIdSuiv, point) 
+                    }
+                }
+                return point
+            }
+
+            function verificationVoisinDroitApportePoints(id, Point){
+
+                if(dict_noeuds[nIdPrec] != null){
+                        const tab=id.split("e")
+                        const tabId=tab[1]
+                        const tabIdPrec=+tabId++
+                        nIdSuiv=`${tab[0]}e${tabIdPrec}`
+                    if (dict_noeuds[nIdPrec].book.genre == dict_noeuds[id].book.genre){
+                        point++
+                        point += verificationVoisinGaucheApportePoints(nIdPrec)
+                    }
+                    else if (dict_noeuds[nIdPrec].book.auteur == dict_noeuds[id].book.auteur){
+                        point++
+                        point += verificationVoisinGaucheApportePoints(nIdPrec)
+                    }
+                    else if (dict_noeuds[nIdPrec].book.format == dict_noeuds[id].book.format){
+                        point++
+                        verificationVoisinGaucheApportePoints(nIdPrec)
+                    }
+                }
+            }
         }
         console.log("apres")
         console.log(dict_joueurs[socket.id])
