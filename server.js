@@ -130,7 +130,7 @@ io.on("connect", (socket) => {
             const noeud = {
                 "id":id,
                 "book":books[Math.floor(Math.random()* books.length)],
-                "coordonnees":[0, 0]
+                "coordonnees":[510 + i*40, 400]
             }
             noeudsChariot.push(noeud)
             dict_noeuds[id] = noeud
@@ -164,6 +164,7 @@ io.on("connect", (socket) => {
             //On met a jour l'affichage de tout les noeuds de tout les clients
             io.emit("liste noeuds", dict_noeuds)
             dict_joueurs[socket.id].selectionNoeud = undefined
+            console.log(dict_noeuds)
         }
     })
     
