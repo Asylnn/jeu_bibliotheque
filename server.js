@@ -7,6 +7,7 @@ const http = require('http')
 const server = http.createServer(app)
 const io = new require("socket.io")(server)
 let counterNoeudsChariot = 0
+let partieEnCours = false
 server.listen(8887, () => {
     console.log("listen on port 8887")
 })
@@ -29,22 +30,25 @@ let nb=30;
 let cmp=150;
 let h=540;
 
-    //boucle
-for(let k=0; k < 3; k++){
-    for(let j=0; j < 3; j++){
-        for(let i=0; i < 14; i++){
-            const id =`n${j}${k}e${i}` 
-            dict_noeuds[id] = {
-                "id":id,
-                "book":undefined,
-                "coordonnees":[30+i*nb+k*h, 200+j*cmp]
+function initialisationNoeuds()
+{
+    dict_noeuds = {}
+    for(let k=0; k < 3; k++){
+        for(let j=0; j < 3; j++){
+            for(let i=0; i < 14; i++){
+                const id =`n${j}${k}e${i}` 
+                dict_noeuds[id] = {
+                    "id":id,
+                    "book":undefined,
+                    "coordonnees":[30+i*nb+k*h, 200+j*cmp]
+                }
+                
             }
-            
         }
     }
 }
 
-
+initialisationNoeuds()
 
 let nbJoueursMax=4
 
@@ -71,6 +75,13 @@ objjavascript.abc == objjavascript[d]
 }
 
 */
+function finPartie()
+{
+    partieEnCours = false
+    io.emit("fin partie")
+    counterNoeudsChariot = 0
+    initialisationNoeuds()
+}
 
 function getNoms(){
     jrs=Object.values(dict_joueurs)
@@ -101,6 +112,7 @@ io.on("connect", (socket) => {
         console.log("deconnection de la part de " + socket.id)
         delete dict_joueurs[socket.id]
         socket.broadcast.emit("liste joueurs", getNoms())
+        finPartie()
     })
 
     
@@ -130,7 +142,8 @@ io.on("connect", (socket) => {
 
     socket.on("commencer partie", () => {
         io.emit("initialisation affichage", dict_noeuds)
-
+        io.emit("début partie")
+        partieEnCours = true
         let noeudsChariot = []
         for(let i = 0; i < 5; i++)
         {
@@ -145,6 +158,10 @@ io.on("connect", (socket) => {
             counterNoeudsChariot++  
         }
         io.emit("creer chariot", noeudsChariot)
+    })
+
+    socket.on("terminer partie", () => {
+        finPartie()
     })
 
     socket.on("selection noeud", id => {
@@ -171,8 +188,9 @@ io.on("connect", (socket) => {
             //socket.emit("confirmation mouvement livre")
             //On met a jour l'affichage de tout les noeuds de tout les clients
             io.emit("liste noeuds", dict_noeuds)
+            
             dict_joueurs[socket.id].selectionNoeud = undefined
-            const book = dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book
+            /*const book = dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book
             const tab=id.split("e")
             const tabId=tab[1]
             const tabIdSuiv=+tabId++
@@ -226,7 +244,7 @@ io.on("connect", (socket) => {
                         verificationVoisinGaucheApportePoints(nIdPrec)
                     }
                 }
-            }
+            }*/
         }
     })
     
