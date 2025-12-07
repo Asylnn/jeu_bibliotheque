@@ -85,6 +85,12 @@ socket.on("erreur",
     }
 )
 
+socket.on("envoie points client", points => {
+    document.getElementById("points").textContent=points
+    
+    
+})
+
 socket.on("liste joueurs", noms => {
     let elem=document.getElementById("joueurs")
     elem.textContent=noms.nom.toString()

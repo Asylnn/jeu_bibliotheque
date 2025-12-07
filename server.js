@@ -171,64 +171,90 @@ io.on("connect", (socket) => {
             //socket.emit("confirmation mouvement livre")
             //On met a jour l'affichage de tout les noeuds de tout les clients
             io.emit("liste noeuds", dict_noeuds)
-            dict_joueurs[socket.id].selectionNoeud = undefined
             const book = dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book
-            const tab=id.split("e")
-            const tabId=tab[1]
-            const tabIdSuiv=+tabId++
-            const tabIdPrec=+tabId--
-            nIdSuiv=`${tab[0]}e${tabIdSuiv}`
-            nIdPrec=`${tab[0]}e${tabIdPrec}`
+            dict_joueurs[socket.id].selectionNoeud = undefined
             const point=0
-            pointsDroit=verificationVoisinDroitApportePoints()
-            pointsGauche=verificationVoisinGaucheApportePoints()
-            totalPoints=pointsDroit+pointsGauche
+            let pointsDroitG=verificationVoisinDroitApportePoints(id, point, "genre")
+            let pointsDroitF=verificationVoisinDroitApportePoints(id, point, "format")
+            let pointsDroitA=verificationVoisinDroitApportePoints(id, point, "auteur")
+            let pointsDroit=pointsDroitA+pointsDroitF+pointsDroitG
+
+
+            let pointsGaucheG=verificationVoisinGaucheApportePoints(id, point, "genre")
+            let pointsGaucheF=verificationVoisinGaucheApportePoints(id, point, "format")
+            let pointsGaucheA=verificationVoisinGaucheApportePoints(id, point, "auteur")
+            let pointsGauche=pointsGaucheA+pointsGaucheF+pointsGaucheG
+            let totalPoints=pointsDroit+pointsGauche
            
-            function verificationVoisinDroitApportePoints(id, point){
-                if(dict_noeuds[nIdSuiv] != null){
-                        const tab=id.split("e")
-                        const tabId=tab[1]
-                        const tabIdSuiv=+tabId++
-                        nIdSuiv=`${tab[0]}e${tabIdSuiv}`
-                    if (dict_noeuds[nId].book.genre == dict_noeuds[id].book.genre){
+            function verificationVoisinDroitApportePoints(id, point, type){
+                const tab=id.split("e")
+                const tabId=tab[1]
+                const tabIdSuiv=+tabId+1
+                nIdSuiv=`${tab[0]}e${tabIdSuiv}`
+
+                if(dict_noeuds[nIdSuiv] == null)
+                    return 0
+
+                if(dict_noeuds[nIdSuiv].book == null)
+                    return 0
+                  
+                if ((type == "genre") && (dict_noeuds[nId].book.genre == dict_noeuds[id].book.genre)){
                         point++
-                        point += verificationVoisinDroitApportePoints(nIdSuiv, point)
-                    }
-                    else if (dict_noeuds[nId].book.auteur == dict_noeuds[id].book.auteur){
+                        point += verificationVoisinDroitApportePoints(nIdSuiv, point, type)
+                }
+                else if ((type == "auteur") && (dict_noeuds[nId].book.auteur == dict_noeuds[id].book.auteur)){
                         point++
-                        point += verificationVoisinDroitApportePoints(nIdSuiv, point)  
-                    }
-                    else if (dict_noeuds[nId].book.format == dict_noeuds[id].book.format){
+                        point += verificationVoisinDroitApportePoints(nIdSuiv, point, type)  
+                }
+                else if ((type == "format") && (dict_noeuds[nId].book.format == dict_noeuds[id].book.format)){
                         point++
-                        point += verificationVoisinDroitApportePoints(nIdSuiv, point) 
-                    }
+                        console.log("points droit : " + point)
+                        point += verificationVoisinDroitApportePoints(nIdSuiv, point, type) 
+                }
+                
+                return point
+            }
+
+            function verificationVoisinGaucheApportePoints(id, point, type){
+                    const tab=id.split("e")
+                    const tabId=tab[1]
+                    const tabIdPrec=+tabId-1
+                    nIdPrec=`${tab[0]}e${tabIdPrec}`
+
+                if(dict_noeuds[nIdPrec] == null)
+                    return 0
+
+                if(dict_noeuds[nIdPrec].book == null)
+                    return 0
+                    
+                
+                if ((type == "genre") && (dict_noeuds[nIdPrec].book.genre == dict_noeuds[id].book.genre)){
+                    point++
+                    point += verificationVoisinGaucheApportePoints(nIdPrec, point, type)
+                }
+                else if ((type == "auteur") && (dict_noeuds[nIdPrec].book.auteur == dict_noeuds[id].book.auteur)){
+                    point++
+                    point += verificationVoisinGaucheApportePoints(nIdPrec, point, type)
+                }
+                else if ((type == "format") && (dict_noeuds[nIdPrec].book.format == dict_noeuds[id].book.format)){
+                    point++
+                    console.log("points gauche : " + point)
+                    point +=verificationVoisinGaucheApportePoints(nIdPrec, point, type)
+                
                 }
                 return point
             }
 
-            function verificationVoisinDroitApportePoints(id, Point){
-
-                if(dict_noeuds[nIdPrec] != null){
-                        const tab=id.split("e")
-                        const tabId=tab[1]
-                        const tabIdPrec=+tabId++
-                        nIdSuiv=`${tab[0]}e${tabIdPrec}`
-                    if (dict_noeuds[nIdPrec].book.genre == dict_noeuds[id].book.genre){
-                        point++
-                        point += verificationVoisinGaucheApportePoints(nIdPrec)
-                    }
-                    else if (dict_noeuds[nIdPrec].book.auteur == dict_noeuds[id].book.auteur){
-                        point++
-                        point += verificationVoisinGaucheApportePoints(nIdPrec)
-                    }
-                    else if (dict_noeuds[nIdPrec].book.format == dict_noeuds[id].book.format){
-                        point++
-                        verificationVoisinGaucheApportePoints(nIdPrec)
-                    }
-                }
-            }
+             socket.emit("envoie points client", totalPoints)
+            
         }
-    })
+
+            
+
+        
+    }
+ 
+)
     
 
     socket.on("message", (arg) => 
