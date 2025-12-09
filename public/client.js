@@ -266,9 +266,16 @@ function displayNode(elem, coordinate, node)
         .attr("stroke-width", 4)
         .attr("fill", "white")
         .attr("id", node.id)
+        .attr("class", "noeud")
         //.attr("id", "b")
         .on("click", (node) => {
             socket.emit("selection noeud", node.target.id)
+        })
+        .on("mouseover", (node) => {
+            d3.select(`#${node.target.id}`).attr("fill", "cyan")
+        })
+        .on("mouseleave", (node) => {
+            d3.select(`#${node.target.id}`).attr("fill", "white")
         })
 }
 
