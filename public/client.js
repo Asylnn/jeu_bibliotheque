@@ -134,7 +134,11 @@ socket.on("erreur",
 )
 
 socket.on("envoie points client", points => {
-    document.getElementById("points").textContent=points
+    let listePoints=document.getElementById("points")
+    for(let i = 0; points.nom.length;i++){
+        listePoints.innerHTML = `${points.nom[i]}/${points.totalPointsPartie[i]}`
+    }
+    
 })
 
 socket.on("liste joueurs", noms => {

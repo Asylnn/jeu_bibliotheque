@@ -98,6 +98,18 @@ function getNoms(){
     
 }
 
+function getPointsJoueurs(){
+    jrs=Object.values(dict_joueurs)
+    points=[]
+    noms=[]
+    for(let joueur of jrs){
+        points.push(joueur.totalPointsPartie)
+        noms.push(joueur.nom)
+    }
+
+    return {nom:noms, totalPointsPartie:points}
+}
+
 function creerChariot()
 {
     let noeudsChariot = []
@@ -160,6 +172,7 @@ io.on("connect", (socket) => {
 
         dict_joueurs[socket.id]= new Joueur(socket.id, nom)
         io.emit("liste joueurs", getNoms())
+        io.emit("envoie points client", getPointsJoueurs())
     })
 
     socket.on("commencer partie", () => {
@@ -290,10 +303,7 @@ io.on("connect", (socket) => {
              socket.emit("envoie points client", totalPoints)
             
         }
-
-            
-
-        
+   
     }
  
 )
