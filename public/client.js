@@ -225,7 +225,7 @@ socket.on("creer chariot", (noeuds) => {
         if(noeuds[i].book != undefined)
             noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
     }
-    createChariot(noeuds, 20)
+    createChariot(noeuds, 10)
 })
 
 //socket.emit("envoie message chat", {message:"Salut ca va"})
@@ -295,7 +295,7 @@ function createChariot(nodes, time)
     let beginTime = document.getElementById("svg").getCurrentTime()
     let bookSupportSVGGroup = d3.select("svg").append("g")
 
-    let path = `M500 400 L700 400 L700 450 L500 450 Z`
+    let path = `M-250 400 L-50 400 L-50 450 L-250 450 Z`
     bookSupportSVGGroup
         .append("path")
         .attr("d", path)
@@ -309,7 +309,7 @@ function createChariot(nodes, time)
         .attr("attributeType", "XML")
         .attr("type", "translate")
         .attr("from", Math.random())
-        .attr("to", 1000)
+        .attr("to", 2000)
         .attr("begin", beginTime)
         .attr("dur", time)
         .attr("repeatCount", 1)

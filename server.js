@@ -106,7 +106,7 @@ function creerChariot()
         const noeud = {
             "id":id,
             "book":books[Math.floor(Math.random()* books.length)],
-            "coordonnees":[510 + i*40, 400]
+            "coordonnees":[-240 + i*40, 400]
         }
         noeudsChariot.push(noeud)
         dict_noeuds[id] = noeud
