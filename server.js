@@ -20,6 +20,7 @@ class Joueur{
     constructor(socketID, nom){
         this.socketID=socketID;
         this.nom=nom;
+        this.totalPointsPartie=0;
         this.selectionNoeud=undefined;
     }
 }
@@ -185,6 +186,7 @@ io.on("connect", (socket) => {
             //Sinon on deplace le livre au nouveau noeud
             dict_noeuds[id].book = dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book
             dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book = undefined
+            //console.log(dict_noeuds[id].book)
             //socket.emit("confirmation mouvement livre")
             //On met a jour l'affichage de tout les noeuds de tout les clients
             io.emit("liste noeuds", dict_noeuds)
@@ -202,13 +204,14 @@ io.on("connect", (socket) => {
             let pointsGaucheA=verificationVoisinGaucheApportePoints(id, "auteur")
             let pointsGauche=pointsGaucheA+pointsGaucheF+pointsGaucheG
             let totalPoints=pointsDroit+pointsGauche
-           
+            dict_joueurs[socket.id].totalPointsPartie+=totalPoints
+
+
             function verificationVoisinDroitApportePoints(id, type){
                 const tab=id.split("e")
                 const tabId=tab[1]
                 const tabIdSuiv=+tabId+1
                 nIdSuiv=`${tab[0]}e${tabIdSuiv}`
-
                 console.log("test droit")
 
                 if(dict_noeuds[nIdSuiv] == null)
@@ -217,11 +220,9 @@ io.on("connect", (socket) => {
                 if(dict_noeuds[nIdSuiv].book == null)
                     return 0
 
-
-                console.log("voisin droit pas null et livre pas null")
+                //console.log("voisin droit pas null et livre pas null")
+                //console.log(dict_noeuds[id].book)
            
-                  
-
                 if ((type == "genre") && (dict_noeuds[nIdSuiv].book.genre == dict_noeuds[id].book.genre)){
                         
                         return verificationVoisinDroitApportePoints(nIdSuiv, type) + 1
@@ -247,19 +248,14 @@ io.on("connect", (socket) => {
 
                     console.log("test gauche")
                     
-
-
                 if(dict_noeuds[nIdPrec] == null)
                     return 0
 
                 if(dict_noeuds[nIdPrec].book == null)
                     return 0
 
-                console.log("voisin gauche pas null et livre pas null")
-              
-
-
-                    
+                //console.log("voisin gauche pas null et livre pas null")
+                //console.log(dict_noeuds[id].book.format)
                 
                 if ((type == "genre") && (dict_noeuds[nIdPrec].book.genre == dict_noeuds[id].book.genre)){
                     return verificationVoisinGaucheApportePoints(nIdPrec, type) + 1
@@ -269,7 +265,7 @@ io.on("connect", (socket) => {
                     return verificationVoisinGaucheApportePoints(nIdPrec, type) + 1
                 }
                 else if ((type == "format") && (dict_noeuds[nIdPrec].book.format == dict_noeuds[id].book.format)){
-                    console.log("points format gauche : " + verificationVoisinGaucheApportePoints(nIdSuiv, type) + 1);
+                    //console.log("points format gauche : " + verificationVoisinGaucheApportePoints(nIdPrec, type) + 1);
 
                     return verificationVoisinGaucheApportePoints(nIdPrec, type) + 1
                 

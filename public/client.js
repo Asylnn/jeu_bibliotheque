@@ -4,6 +4,9 @@ console.log("hello world!")
 
 let socket = io()
 let partieEnCours = false
+let nombreJoueurs = 0
+let nomsJoueurs = []
+let totalPoints = 0
 
 socket.emit("ping")
 socket.on("pong", data => {
@@ -132,8 +135,6 @@ socket.on("erreur",
 
 socket.on("envoie points client", points => {
     document.getElementById("points").textContent=points
-    
-    
 })
 
 socket.on("liste joueurs", noms => {
@@ -143,6 +144,8 @@ socket.on("liste joueurs", noms => {
 
     let listeJoueurs=document.getElementById("nombreJoueurs")
     listeJoueurs.innerHTML = `${noms.nom.length}/${noms.max}`
+    nombreJoueurs = noms.nom.length
+    nomsJoueurs=noms.nom
     testAffichageBoutonCommencerTerminer(noms.nom.length)
     
     
@@ -158,7 +161,82 @@ socket.on("initialisation affichage", noeuds => {
             //Fait en sorte que les objets livres soit de la classe livre
         displayNode(svg, noeuds[i].coordonnees, noeuds[i])
     }
+
+   //lignes
+    /*
+   let cont=60
+   for(let i=0; i < 3; i++){
+        svg.append('line')
+        .attr('x1', 200)
+        .attr('y1', 10+cont*i)
+        .attr('x2', 318)
+        .attr('y2', 10+cont*i)
+        .attr('stroke', '#54301D')
+        .attr('stroke-width', 8)
+   }
+   //colonnes
+    svg.append('line')
+        .attr('x1', 198)
+        .attr('y1', 6)
+        .attr('x2', 198)
+        .attr('y2', 134)
+        .attr('stroke', '#54301D')
+        .attr('stroke-width', 8)
+
+    svg.append('line')
+        .attr('x1', 318)
+        .attr('y1', 6)
+        .attr('x2', 318)
+        .attr('y2', 134)
+        .attr('stroke', '#54301D')
+        .attr('stroke-width', 8)
+   let nb=120
+   let nb2=118
+   console.log("nombre joueurs " + nombreJoueurs)
+
+    for(let i=0; i < nombreJoueurs; i++){
+        svg.append('line')
+        .attr('x1', 318+nb*(i+1))
+        .attr('y1', 6)
+        .attr('x2', 318+nb*(i+1))
+        .attr('y2', 134)
+        .attr('stroke', '#54301D')
+        .attr('stroke-width', 8)
+        for(let j=0; j<3; j++){
+            svg.append('line')
+            .attr('x1', 200+nb2*(i+1))
+            .attr('y1', 10+cont*j)
+            .attr('x2', 318+nb2*(i+1))
+            .attr('y2', 10+cont*j)
+            .attr('stroke', '#54301D')
+            .attr('stroke-width', 8)
+
+        }
+
+    }
+*/
+
+
+    let listeJoueurs=document.getElementById("nombreJoueurs")
+    let points=document.getElementById("points")
+    for(let i=0; i<nombreJoueurs; i++){
+        listeJoueurs.innerHTML += `${nomsJoueurs[i]}`
+    }
+   
 })
+
+/*
+var svg = d3.select("svg")
+svg.append('line')
+    .attr('x1', 10)
+    .attr('y1', 50)
+    .attr('x2', 450)
+    .attr('y2', 50)
+    .attr('stroke', '#54301D')
+    .attr('stroke-width', 8)
+
+}, 200)
+*/
 
 
 //Lorsque le client recoit la liste de tout les noeuds (lorsque un joueur déplace un livre) et met a jour l'affichage
@@ -312,6 +390,12 @@ function createChariot(nodes)
     createBookSupport(nodes1)
     createBookSupport2(nodes2)*/
 })()
+
+
+//tableau
+
+
+
 
 //etageres
 
