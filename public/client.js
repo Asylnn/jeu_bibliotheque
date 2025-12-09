@@ -153,8 +153,48 @@ socket.on("liste joueurs", noms => {
 
 //Initialisation de l'affichage lorsque la partie commence
 socket.on("initialisation affichage", noeuds => {
-    noeuds = Object.values(noeuds) //Transforme le dictionnaire en tableau
     let svg = d3.select("svg")
+
+    //etageres
+
+    for(let i=0; i < 3; i++){
+
+        let nb=540;
+        let cmp=150;
+        for(let j=0; j < 4; j++){
+            svg.append('line')
+                .attr('x1', 10+i*nb)
+                .attr('y1', 50+j*cmp)
+                .attr('x2', 450+i*nb)
+                .attr('y2', 50+j*cmp)
+                .attr('stroke', '#54301D')
+                .attr('stroke-width', 8)
+        }
+
+        //lignes verticales
+
+        svg.append('line')
+            .attr('x1', 10+i*nb)
+            .attr('y1', 46)
+            .attr('x2', 10+i*nb)
+            .attr('y2', 640)
+            .attr('stroke', '#54301D')
+            .attr('stroke-width', 8)
+        svg.append('line')
+            .attr('x1', 450+i*nb)
+            .attr('y1', 46)
+            .attr('x2', 450+i*nb)
+            .attr('y2', 640)
+            .attr('stroke', '#54301D')
+            .attr('stroke-width', 8)
+
+    }
+
+
+    //noeuds
+
+    noeuds = Object.values(noeuds) //Transforme le dictionnaire en tableau
+    
     for (let i = 0; i < noeuds.length; i++) {
         if(noeuds[i].book != undefined)
             noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
@@ -263,7 +303,7 @@ socket.on("creer chariot", (noeuds) => {
         if(noeuds[i].book != undefined)
             noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
     }
-    createChariot(noeuds)
+    createChariot(noeuds, 10)
 })
 
 //socket.emit("envoie message chat", {message:"Salut ca va"})
@@ -304,9 +344,16 @@ function displayNode(elem, coordinate, node)
         .attr("stroke-width", 4)
         .attr("fill", "white")
         .attr("id", node.id)
+        .attr("class", "noeud")
         //.attr("id", "b")
         .on("click", (node) => {
             socket.emit("selection noeud", node.target.id)
+        })
+        .on("mouseover", (node) => {
+            d3.select(`#${node.target.id}`).attr("fill", "cyan")
+        })
+        .on("mouseleave", (node) => {
+            d3.select(`#${node.target.id}`).attr("fill", "white")
         })
 }
 
@@ -328,31 +375,33 @@ function displayNode(elem, coordinate, node)
     }
 }*/
 
-function createChariot(nodes)
-{
+function createChariot(nodes, time)
+{   
+    let beginTime = document.getElementById("svg").getCurrentTime()
     let bookSupportSVGGroup = d3.select("svg").append("g")
-    
-    let path = `M500 400 L700 400 L700 450 L500 450 Z`
+
+    let path = `M-250 400 L-50 400 L-50 450 L-250 450 Z`
     bookSupportSVGGroup
         .append("path")
         .attr("d", path)
         .attr("stroke", "yellow")
         .attr("stroke-width", 4)
         .attr("fill", "yellow")
+        
     bookSupportSVGGroup
         .append("animateTransform")
         .attr("attributeName", "transform")
         .attr("attributeType", "XML")
         .attr("type", "translate")
-        .attr("from", 0)
-        .attr("to", 1000)
-        .attr("begin", 0)
-        .attr("dur", 20)
+        .attr("from", Math.random())
+        .attr("to", 2000)
+        .attr("begin", beginTime)
+        .attr("dur", time)
         .attr("repeatCount", 1)
         .attr("fill", "freeze")
 
 
-        /*<animateTransform
+      /*<animateTransform
       attributeName="transform"
       attributeType="XML"
       type="translate"

@@ -30,6 +30,7 @@ let dict_noeuds={}
 let nb=30;
 let cmp=150;
 let h=540;
+let intervalChariotId;
 
 function initialisationNoeuds()
 {
@@ -81,6 +82,7 @@ function finPartie()
     partieEnCours = false
     io.emit("fin partie")
     counterNoeudsChariot = 0
+    clearInterval(intervalChariotId)
     initialisationNoeuds()
 }
 
@@ -95,6 +97,25 @@ function getNoms(){
     return {nom:noms, max:nbJoueursMax}
     
 }
+
+function creerChariot()
+{
+    let noeudsChariot = []
+    for(let i = 0; i < 5; i++)
+    {
+        const id = `c${counterNoeudsChariot}`
+        const noeud = {
+            "id":id,
+            "book":books[Math.floor(Math.random()* books.length)],
+            "coordonnees":[-240 + i*40, 400]
+        }
+        noeudsChariot.push(noeud)
+        dict_noeuds[id] = noeud
+        counterNoeudsChariot++  
+    }
+    io.emit("creer chariot", noeudsChariot)
+}
+
 io.on("connect", (socket) => {
     console.log("nouvelle connection")
     socket.on("ping", () => {
@@ -145,20 +166,11 @@ io.on("connect", (socket) => {
         io.emit("initialisation affichage", dict_noeuds)
         io.emit("début partie")
         partieEnCours = true
-        let noeudsChariot = []
-        for(let i = 0; i < 5; i++)
-        {
-            const id = `c${counterNoeudsChariot}`
-            const noeud = {
-                "id":id,
-                "book":books[Math.floor(Math.random()* books.length)],
-                "coordonnees":[510 + i*40, 400]
-            }
-            noeudsChariot.push(noeud)
-            dict_noeuds[id] = noeud
-            counterNoeudsChariot++  
-        }
-        io.emit("creer chariot", noeudsChariot)
+        
+        creerChariot()
+        intervalChariotId = setInterval(() => {
+            creerChariot()
+        }, 10_000)
     })
 
     socket.on("terminer partie", () => {

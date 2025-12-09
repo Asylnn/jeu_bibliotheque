@@ -15,12 +15,7 @@ class Book
         {
             case "roman":
                 return "red"
-            case "théâtre":   const tab=id.split("e")
-            const tabId=tab[1]
-            const tabIdSuiv=+tabId+1
-            const tabIdPrec=+tabId-1
-            nIdSuiv=`${tab[0]}e${tabIdSuiv}`
-            nIdPrec=`${tab[0]}e${tabIdPrec}`
+            case "théâtre":
                 return "green"
             case "sf":
                 return "blue"
