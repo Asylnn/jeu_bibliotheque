@@ -150,8 +150,48 @@ socket.on("liste joueurs", noms => {
 
 //Initialisation de l'affichage lorsque la partie commence
 socket.on("initialisation affichage", noeuds => {
-    noeuds = Object.values(noeuds) //Transforme le dictionnaire en tableau
     let svg = d3.select("svg")
+
+    //etageres
+
+    for(let i=0; i < 3; i++){
+
+        let nb=540;
+        let cmp=150;
+        for(let j=0; j < 4; j++){
+            svg.append('line')
+                .attr('x1', 10+i*nb)
+                .attr('y1', 50+j*cmp)
+                .attr('x2', 450+i*nb)
+                .attr('y2', 50+j*cmp)
+                .attr('stroke', '#54301D')
+                .attr('stroke-width', 8)
+        }
+
+        //lignes verticales
+
+        svg.append('line')
+            .attr('x1', 10+i*nb)
+            .attr('y1', 46)
+            .attr('x2', 10+i*nb)
+            .attr('y2', 640)
+            .attr('stroke', '#54301D')
+            .attr('stroke-width', 8)
+        svg.append('line')
+            .attr('x1', 450+i*nb)
+            .attr('y1', 46)
+            .attr('x2', 450+i*nb)
+            .attr('y2', 640)
+            .attr('stroke', '#54301D')
+            .attr('stroke-width', 8)
+
+    }
+
+
+    //noeuds
+
+    noeuds = Object.values(noeuds) //Transforme le dictionnaire en tableau
+    
     for (let i = 0; i < noeuds.length; i++) {
         if(noeuds[i].book != undefined)
             noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
@@ -312,93 +352,6 @@ function createChariot(nodes)
     createBookSupport(nodes1)
     createBookSupport2(nodes2)*/
 })()
-
-//etageres
-
-setTimeout(()=> {
-
-var svg = d3.select("svg")
-svg.append('line')
-    .attr('x1', 10)
-    .attr('y1', 50)
-    .attr('x2', 450)
-    .attr('y2', 50)
-    .attr('stroke', '#54301D')
-    .attr('stroke-width', 8)
-
-}, 200)
-
-setTimeout(()=> {
-
-var svg = d3.select("svg")
-svg.append('line')
-    .attr('x1', 10)
-    .attr('y1', 200)
-    .attr('x2', 450)
-    .attr('y2', 200)
-    .attr('stroke', '#54301D')
-    .attr('stroke-width', 8)
-
-}, 200)
-
-setTimeout(()=> {
-
-var svg = d3.select("svg")
-svg.append('line')
-    .attr('x1', 10)
-    .attr('y1', 350)
-    .attr('x2', 450)
-    .attr('y2', 350)
-    .attr('stroke', '#54301D')
-    .attr('stroke-width', 8)
-
-}, 200)
-
-setTimeout(()=> {
-
-var svg = d3.select("svg")
-svg.append('line')
-    .attr('x1', 10)
-    .attr('y1', 500)
-    .attr('x2', 450)
-    .attr('y2', 500)
-    .attr('stroke', '#54301D')
-    .attr('stroke-width', 8)
-
-}, 200)
-
-
-
-
-setTimeout(()=> {
-
-var svg = d3.select("svg")
-svg.append('line')
-    .attr('x1', 10)
-    .attr('y1', 46)
-    .attr('x2', 10)
-    .attr('y2', 640)
-    .attr('stroke', '#54301D')
-    .attr('stroke-width', 8)
-
-}, 200)
-
-
-setTimeout(()=> {
-
-var svg = d3.select("svg")
-svg.append('line')
-    .attr('x1', 450)
-    .attr('y1', 46)
-    .attr('x2', 450)
-    .attr('y2', 640)
-    .attr('stroke', '#54301D')
-    .attr('stroke-width', 8)
-
-}, 200)
-
-
-
 
 
 
