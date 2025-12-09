@@ -225,7 +225,7 @@ socket.on("creer chariot", (noeuds) => {
         if(noeuds[i].book != undefined)
             noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
     }
-    createChariot(noeuds)
+    createChariot(noeuds, 20)
 })
 
 //socket.emit("envoie message chat", {message:"Salut ca va"})
@@ -290,10 +290,11 @@ function displayNode(elem, coordinate, node)
     }
 }*/
 
-function createChariot(nodes)
-{
+function createChariot(nodes, time)
+{   
+    let beginTime = document.getElementById("svg").getCurrentTime()
     let bookSupportSVGGroup = d3.select("svg").append("g")
-    
+
     let path = `M500 400 L700 400 L700 450 L500 450 Z`
     bookSupportSVGGroup
         .append("path")
@@ -301,20 +302,21 @@ function createChariot(nodes)
         .attr("stroke", "yellow")
         .attr("stroke-width", 4)
         .attr("fill", "yellow")
+        
     bookSupportSVGGroup
         .append("animateTransform")
         .attr("attributeName", "transform")
         .attr("attributeType", "XML")
         .attr("type", "translate")
-        .attr("from", 0)
+        .attr("from", Math.random())
         .attr("to", 1000)
-        .attr("begin", 0)
-        .attr("dur", 20)
+        .attr("begin", beginTime)
+        .attr("dur", time)
         .attr("repeatCount", 1)
         .attr("fill", "freeze")
 
 
-        /*<animateTransform
+      /*<animateTransform
       attributeName="transform"
       attributeType="XML"
       type="translate"
