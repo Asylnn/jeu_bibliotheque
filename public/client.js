@@ -135,8 +135,8 @@ socket.on("erreur",
 
 socket.on("envoie points client", points => {
     let listePoints=document.getElementById("points")
-    for(let i = 0; points.nom.length;i++){
-        listePoints.innerHTML = `${points.nom[i]}/${points.totalPointsPartie[i]}`
+    for(let i = 0; i  < points.nom.length;i++){
+        listePoints.innerHTML += `${points.nom[i]}/${points.totalPointsPartie[i]}`
     }
     
 })
@@ -307,7 +307,7 @@ socket.on("creer chariot", (noeuds) => {
         if(noeuds[i].book != undefined)
             noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
     }
-    createChariot(noeuds, 10)
+    createChariot(noeuds, 25)
 })
 
 //socket.emit("envoie message chat", {message:"Salut ca va"})
