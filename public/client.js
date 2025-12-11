@@ -32,11 +32,22 @@ function entrerDansLaPartie(){
     elem.style.display = "inline"
     socket.emit('entree', input.value);
     console.log("entrer dans la partie")
+
+    function terminerLaPartie()
+{
+   
+    partieEnCours = false
+    testAffichageBoutonCommencerTerminer(0)
+    socket.emit("terminer partie")
+    let svg = d3.select("svg")
+    svg.selectAll("*").remove();
+}
     
     
 }*/
 
 function seDeconnecterDeLaPartie(){
+  
     let input=document.getElementById("nom");
     socket.emit("sortie", input.value);
     console.log("sortie de la partie");
@@ -85,11 +96,12 @@ function commencerLaPartie()
 
 function terminerLaPartie()
 {
+   
     partieEnCours = false
     testAffichageBoutonCommencerTerminer(0)
     socket.emit("terminer partie")
-    let svg = d3.select("svg")
-    svg.selectAll("*").remove();
+
+    
 }
 
 
@@ -111,6 +123,11 @@ socket.on("début partie", () => {
 socket.on("fin partie", () => {
     document.getElementById("commencer").style.display = "inline"
     document.getElementById("terminer").style.display = "none"
+    let elem=document.getElementById("messagerie");
+    elem.style.display="none"
+
+    let svg = d3.select("svg")
+    svg.selectAll("*").remove();
 })
 
 
@@ -135,8 +152,9 @@ socket.on("erreur",
 
 socket.on("envoie points client", points => {
     let listePoints=document.getElementById("points")
+    listePoints.innerHTML =""
     for(let i = 0; i  < points.nom.length;i++){
-        listePoints.innerHTML += `${points.nom[i]}/${points.totalPointsPartie[i]}`
+        listePoints.innerHTML += ` ${points.nom[i] }/${ points.totalPointsPartie[i]} `
     }
     
 })
@@ -263,9 +281,11 @@ socket.on("initialisation affichage", noeuds => {
 
     let listeJoueurs=document.getElementById("nombreJoueurs")
     let points=document.getElementById("points")
+    /*
     for(let i=0; i<nombreJoueurs; i++){
         listeJoueurs.innerHTML += `${nomsJoueurs[i]}`
     }
+        */
    
 })
 
@@ -307,7 +327,7 @@ socket.on("creer chariot", (noeuds) => {
         if(noeuds[i].book != undefined)
             noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
     }
-    createChariot(noeuds, 25)
+    createChariot(noeuds, 60)
 })
 
 //socket.emit("envoie message chat", {message:"Salut ca va"})

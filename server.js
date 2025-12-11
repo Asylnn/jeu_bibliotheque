@@ -139,7 +139,7 @@ io.on("connect", (socket) => {
 
     socket.on("sortie", () => {console.log("message sortie reçu")
         delete dict_joueurs[socket.id]
-        socket.emit("liste joueurs", getNoms())
+        io.emit("liste joueurs", getNoms())
     })
 
     socket.on("disconnect", () => {
@@ -257,6 +257,7 @@ io.on("connect", (socket) => {
                         return verificationVoisinDroitApportePoints(nIdSuiv, type) + 1
                 }
                 else if ((type == "format") && (dict_noeuds[nIdSuiv].book.format == dict_noeuds[id].book.format)){
+                        console.log(verificationVoisinDroitApportePoints(nIdSuiv, type) + 1)
                         return verificationVoisinDroitApportePoints(nIdSuiv, type) + 1
                 }
 
@@ -290,7 +291,7 @@ io.on("connect", (socket) => {
                     return verificationVoisinGaucheApportePoints(nIdPrec, type) + 1
                 }
                 else if ((type == "format") && (dict_noeuds[nIdPrec].book.format == dict_noeuds[id].book.format)){
-                    //console.log("points format gauche : " + verificationVoisinGaucheApportePoints(nIdPrec, type) + 1);
+                    console.log("points format gauche : " + verificationVoisinGaucheApportePoints(nIdPrec, type) + 1);
 
                     return verificationVoisinGaucheApportePoints(nIdPrec, type) + 1
                 
@@ -300,7 +301,7 @@ io.on("connect", (socket) => {
                 
             }
 
-             socket.emit("envoie points client", totalPoints)
+             socket.emit("envoie points client", getPointsJoueurs())
             
         }
    
