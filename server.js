@@ -206,8 +206,13 @@ io.on("connect", (socket) => {
 
         //Si le joueur n'a pas de noeuds selectionné et qu'il a selectionné un noeud qui a un livre, alors il selectionne ce noeud
         if(dict_joueurs[socket.id].selectionNoeud == undefined && dict_noeuds[id].book != undefined)
+        {
+            socket.emit("affichage noeud", dict_noeuds[id])
             dict_joueurs[socket.id].selectionNoeud = id
+        }
+            
         else {
+            socket.emit("affichage noeud", undefined)
             //Sinon on deplace le livre au nouveau noeud
             dict_noeuds[id].book = dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book
             dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book = undefined

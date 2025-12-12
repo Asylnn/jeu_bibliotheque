@@ -7,6 +7,7 @@ let partieEnCours = false
 let nombreJoueurs = 0
 let nomsJoueurs = []
 let totalPoints = 0
+let noeudSelectionné = {}
 
 socket.emit("ping")
 socket.on("pong", data => {
@@ -173,6 +174,36 @@ socket.on("liste joueurs", noms => {
     
 })
 
+
+socket.on("affichage noeud", noeud => {
+    console.log("HHHHEEEELLLLOOOOOOO")
+    console.log(noeud)
+    if(noeud != undefined)
+    {
+        console.log(d3.select(`#${noeud.id}`))
+        console.log(d3.select(`#${noeud.id}`).node())
+        selectionNoeud = noeud
+        noeud.book = Object.assign(new Book(), noeud.book)
+        const group = d3.select(d3.select(`#${noeud.id}`).node().parentNode)
+        d3.select(`#${noeud.id}`).remove()
+        d3.select(`#b${selectionNoeud.id}`).remove()
+        console.log(selectionNoeud)
+        displayNode(group, noeud.coordonnees, noeud, "blue")
+        
+        //d3.select(`#${noeud?.}`).attr("fill", "blue")
+    }
+    else
+    {
+        selectionNoeud.book = Object.assign(new Book(), selectionNoeud.book)
+        const group = d3.select(d3.select(`#${selectionNoeud.id}`).node().parentNode)
+        d3.select(`#${selectionNoeud.id}`).remove()
+        d3.select(`#b${selectionNoeud.id}`).remove()
+        displayNode(group, selectionNoeud.coordonnees, selectionNoeud)
+    }
+    
+    console.log(selectionNoeud)
+})
+
 //Initialisation de l'affichage lorsque la partie commence
 socket.on("initialisation affichage", noeuds => {
     let svg = d3.select("svg")
@@ -336,10 +367,6 @@ socket.on("creer chariot", (noeuds) => {
 //PARTIE D3
 function displayBook(elem, coordinate, book, id)
 {
-    console.log(elem)
-    console.log(book)
-    console.log(id)
-    console.log(coordinate)
     let bookWidth = 25
     let path = `M${coordinate[0]} ${coordinate[1]} L${coordinate[0]+bookWidth} ${coordinate[1]} L${coordinate[0]+bookWidth} ${coordinate[1]-book.getSize()} L${coordinate[0]} ${coordinate[1]-book.getSize()} Z`
     elem
@@ -354,8 +381,11 @@ function displayBook(elem, coordinate, book, id)
         .html(book.titre)
 }
 
-function displayNode(elem, coordinate, node)
+function displayNode(elem, coordinate, node, couleur = "white")
 {
+    console.log("display node")
+    console.log(noeudSelectionné)
+    //console.log("display node", node)
     if(node.book != null)
         displayBook(elem, coordinate, node.book, node.id)
 
@@ -366,7 +396,7 @@ function displayNode(elem, coordinate, node)
         .attr("r", 10)
         .attr("stroke", "black")
         .attr("stroke-width", 4)
-        .attr("fill", "white")
+        .attr("fill", couleur)
         .attr("id", node.id)
         .attr("class", "noeud")
         //.attr("id", "b")
@@ -374,10 +404,18 @@ function displayNode(elem, coordinate, node)
             socket.emit("selection noeud", node.target.id)
         })
         .on("mouseover", (node) => {
-            d3.select(`#${node.target.id}`).attr("fill", "cyan")
+            console.log(noeudSelectionné)
+            if(couleur == "white")
+                d3.select(`#${node.target.id}`).attr("fill", "cyan")
+            else
+                d3.select(`#${node.target.id}`).attr("fill", "blue")
         })
         .on("mouseleave", (node) => {
-            d3.select(`#${node.target.id}`).attr("fill", "white")
+            console.log(noeudSelectionné)
+            if(couleur == "white")
+                d3.select(`#${node.target.id}`).attr("fill", "white")
+            else
+                d3.select(`#${node.target.id}`).attr("fill", "blue")
         })
 }
 
@@ -451,9 +489,6 @@ function createChariot(nodes, time)
     {
         jsonBooks[i] = Object.assign(new Book(), jsonBooks[i])
     }
-    console.log(jsonBooks)
-
-    console.log(jsonBooks[10].getColor())
 
     for(let i = 0; i < 12; i++){
         displayBook([32*(i+1),200], jsonBooks[i])
