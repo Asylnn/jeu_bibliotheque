@@ -51,6 +51,8 @@ function seDeconnecterDeLaPartie(){
     socket.emit("sortie", input.value);
     console.log("sortie de la partie");
     console.log("bien entree")
+    socket.disconnect();
+    
     let messagerie=document.getElementById("messagerie")
     let elem=document.getElementById("entree-nom");
     let joueurs=document.getElementById("joueurs");
@@ -61,7 +63,7 @@ function seDeconnecterDeLaPartie(){
     let points=document.getElementById("points");
     let tableau=document.getElementById("tableau");
 
-
+    
 
     joueurs.style.display="none";
     commencer.style.display = "none";
@@ -74,6 +76,78 @@ function seDeconnecterDeLaPartie(){
     messagerie.style.display="none"
     let svg = d3.select("svg");
     svg.selectAll("*").remove();
+
+    socket = io();
+
+    socket.on("entree dans la partie", () => {
+    console.log("bien entree")
+    let messagerie=document.getElementById("messagerie")
+    let elem=document.getElementById("entree-nom");
+    elem.style.display = "none"
+    messagerie.style.display="block"
+
+})
+
+socket.on("début partie", () => {
+    document.getElementById("commencer").style.display = "none"
+    document.getElementById("terminer").style.display = "inline"
+})
+
+
+socket.on("fin partie", () => {
+    document.getElementById("commencer").style.display = "inline"
+    document.getElementById("terminer").style.display = "none"
+    let elem=document.getElementById("messagerie");
+    elem.style.display="none"
+
+    let svg = d3.select("svg")
+    svg.selectAll("*").remove();
+})
+
+
+socket.on("envoie message client", message => 
+{
+    console.log("message reçu")
+    let messagerie=document.getElementById("messagerie");
+    messagerie.innerHTML += `<p>${message.nom} : ${message.message}</p>` // message.nom + " : " + message.message
+  
+})
+
+socket.on("erreur", 
+    messageErreur => {
+        let erreur=document.getElementById("erreur")
+        erreur.innerHTML=messageErreur
+        console.log(messageErreur)
+        setTimeout(() => {
+            erreur.innerHTML=""
+        }, 10000)
+    }
+)
+
+socket.on("envoie points client", points => {
+    let listePoints=document.getElementById("points")
+    listePoints.innerHTML =""
+    for(let i = 0; i  < points.nom.length;i++){
+        listePoints.innerHTML += ` ${points.nom[i] }/${ points.totalPointsPartie[i]} `
+    }
+    
+})
+
+socket.on("liste joueurs", noms => {
+    let elem=document.getElementById("joueurs")
+    elem.textContent=noms.nom.toString()
+    console.log("liste noms : " +  noms.nom)
+
+    let listeJoueurs=document.getElementById("nombreJoueurs")
+    listeJoueurs.innerHTML = `${noms.nom.length}/${noms.max}`
+    nombreJoueurs = noms.nom.length
+    nomsJoueurs=noms.nom
+    testAffichageBoutonCommencerTerminer(noms.nom.length)
+    
+    
+})
+
+    
 
 }
 
