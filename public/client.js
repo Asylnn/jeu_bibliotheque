@@ -1,5 +1,3 @@
-
-
 console.log("hello world!")
 
 let socket = io()
@@ -55,8 +53,28 @@ function seDeconnecterDeLaPartie(){
     console.log("bien entree")
     let messagerie=document.getElementById("messagerie")
     let elem=document.getElementById("entree-nom");
+    let joueurs=document.getElementById("joueurs");
+    let commencer=document.getElementById("commencer");
+    let terminerPartie=document.getElementById("terminerPartie");
+    let deconnexion=document.getElementById("deconnexion");
+    let nombreJoueurs=document.getElementById("nombreJoueurs");
+    let points=document.getElementById("points");
+    let tableau=document.getElementById("tableau");
+
+
+
+    joueurs.style.display="none";
+    commencer.style.display = "none";
+    terminerPartie.style.display = "none";
+    deconnexion.style.display = "none";
+    nombreJoueurs.style.display = "none";
+    points.style.display = "none";
+    tableau.style.display = "none";
     elem.style.display = "block"
     messagerie.style.display="none"
+    let svg = d3.select("svg");
+    svg.selectAll("*").remove();
+
 }
 
 function envoyerUnMessage(){
