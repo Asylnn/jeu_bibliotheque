@@ -1,5 +1,3 @@
-
-
 console.log("hello world!")
 
 let socket = io()
@@ -19,6 +17,7 @@ function entrerDansLaPartie(){
     let input=document.getElementById("nom");
     //let elem=document.getElementById("entree-nom");
     socket.emit('entree', input.value);
+    console.log("emit entrer")
     console.log("entrer dans la partie")
     //elem.style.display = "none"
 
@@ -53,10 +52,46 @@ function seDeconnecterDeLaPartie(){
     socket.emit("sortie", input.value);
     console.log("sortie de la partie");
     console.log("bien entree")
+
+
+
     let messagerie=document.getElementById("chat")
     let elem=document.getElementById("entree-nom");
     elem.style.display = "flex"
+    socket.disconnect();
+    
+
+
+    /*let messagerie=document.getElementById("messagerie")
+    let elem=document.getElementById("entree-nom");*/
+    let joueurs=document.getElementById("joueurs");
+    let commencer=document.getElementById("commencer");
+    let terminerPartie=document.getElementById("terminerPartie");
+    let deconnexion=document.getElementById("deconnexion");
+    let nombreJoueurs=document.getElementById("nombreJoueurs");
+    let points=document.getElementById("points");
+    let tableau=document.getElementById("tableau");
+
+    
+
+    joueurs.style.display="none";
+    commencer.style.display = "none";
+    terminerPartie.style.display = "none";
+    deconnexion.style.display = "none";
+    nombreJoueurs.style.display = "none";
+    points.style.display = "none";
+    tableau.style.display = "none";
+    elem.style.display = "block"
     messagerie.style.display="none"
+    let svg = d3.select("svg");
+    svg.selectAll("*").remove();
+
+
+
+
+
+    
+
 }
 
 function envoyerUnMessage(){
@@ -105,16 +140,6 @@ function terminerLaPartie()
     
 }
 
-
-socket.on("entree dans la partie", () => {
-    console.log("bien entree")
-    let messagerie=document.getElementById("chat")
-    let elem=document.getElementById("entree-nom");
-    elem.style.display = "none"
-    messagerie.style.display="flex"
-
-})
-
 socket.on("début partie", () => {
     document.getElementById("commencer").style.display = "none"
     document.getElementById("terminer").style.display = "inline"
@@ -124,8 +149,6 @@ socket.on("début partie", () => {
 socket.on("fin partie", () => {
     document.getElementById("commencer").style.display = "inline"
     document.getElementById("terminer").style.display = "none"
-    let elem=document.getElementById("chat");
-    elem.style.display="none"
 
     let svg = d3.select("svg")
     svg.selectAll("*").remove();
@@ -137,8 +160,18 @@ socket.on("envoie message client", message =>
     console.log("message reçu")
     let messagerie=document.getElementById("messagerie");
     messagerie.innerHTML += `<p>${message.nom} : ${message.message}</p>` // message.nom + " : " + message.message
-  
+
 })
+
+socket.on("entree dans la partie", () => {
+    console.log("bien entree")
+    let messagerie=document.getElementById("chat")
+    let elem=document.getElementById("entree-nom");
+    elem.style.display = "none"
+    messagerie.style.display="flex"
+
+})
+
 
 socket.on("erreur", 
     messageErreur => {

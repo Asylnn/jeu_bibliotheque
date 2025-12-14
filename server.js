@@ -146,7 +146,7 @@ io.on("connect", (socket) => {
         console.log("deconnection de la part de " + socket.id)
         delete dict_joueurs[socket.id]
         socket.broadcast.emit("liste joueurs", getNoms())
-        finPartie()
+        //finPartie()
     })
 
     
@@ -334,3 +334,4 @@ io.on("connect", (socket) => {
     })
     
 })
+
