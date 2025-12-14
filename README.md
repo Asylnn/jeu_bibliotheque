@@ -34,23 +34,23 @@ Pour faire tourner le serveur il faut :
 
 cloner le projet
 ```sh
-    git clone https://github.com/Asylnn/jeu_bibliotheque
+git clone https://github.com/Asylnn/jeu_bibliotheque
 ```
 ATTENTION! La branche par défaut est main, mais le code le plus récent est sur la branche master
 Il faut donc passer sur cette branche avant.
 ```sh
-    git checkout master
-    git pull origin master
+git checkout master
+git pull origin master
 ```
 
 Il faut ensuite installer les dépendances (nécéssite que node et npm soit installé)
 ```sh
-    npm install
+npm install
 ```
 
 Pour lancer le serveur
 ```sh
-    node server.js
+node server.js
 ```
 
 Le serveur est hébergé sur le port 8887.
