@@ -1,5 +1,3 @@
-console.log("hello world!")
-
 let socket = io()
 let partieEnCours = false
 let dansLaPartie = false
@@ -10,43 +8,11 @@ let totalPoints = 0
 let noeudSelectionné = {}
 
 
-socket.emit("ping")
-socket.on("pong", data => {
-    console.log("recu pong")
-})
-
-
 function entrerDansLaPartie(){
     let input=document.getElementById("nom");
-    //let elem=document.getElementById("entree-nom");
     socket.emit('entree', input.value);
-    console.log("emit entrer")
-    //elem.style.display = "none"
 
-    
-    
 }
-
-/*
-function entrerDansLaPartie(){
-    let elem=document.getElementById("nom");
-    elem.style.display = "none"
-    elem.style.display = "inline"
-    socket.emit('entree', input.value);
-    console.log("entrer dans la partie")
-
-    function terminerLaPartie()
-{
-   
-    partieEnCours = false
-    testAffichageBoutonCommencerTerminer(0)
-    socket.emit("terminer partie")
-    let svg = d3.select("svg")
-    svg.selectAll("*").remove();
-}
-    
-    
-}*/
 
 function seDeconnecterDuServeur(){
     connecté = false
@@ -61,45 +27,12 @@ function seDeconnecterDuServeur(){
 
     terminerLaPartie()
     
-
-
-    /*let messagerie=document.getElementById("messagerie")
-    let elem=document.getElementById("entree-nom");*/
-    /*let joueurs=document.getElementById("joueurs");
-    let commencer=document.getElementById("commencer");
-    let terminerPartie=document.getElementById("terminerPartie");
-    let deconnexion=document.getElementById("deconnexion");
-    let nombreJoueurs=document.getElementById("nombreJoueurs");
-    let points=document.getElementById("points");
-    let tableau=document.getElementById("tableau");
-
-    
-
-    joueurs.style.display="none";
-    commencer.style.display = "none";
-    terminerPartie.style.display = "none";
-    deconnexion
-    nombreJoueurs.style.display = "none";
-    points.style.display = "none";
-    tableau.style.display = "none";
-    elem.style.display = "block"
-    
-    let svg = d3.select("svg");
-    svg.selectAll("*").remove();*/
-
-
-
-
-
-    
-
 }
 
 function envoyerUnMessage(){
     let input=document.getElementById("message");
     socket.emit("message", input.value);
     input.value=""
-    console.log("message envoyé")
 }
 
 function testAffichageBoutonCommencerTerminer()
@@ -171,7 +104,6 @@ socket.on("fin partie", () => {
 
 socket.on("envoie message client", message => 
 {
-    console.log("message reçu")
     let messagerie=document.getElementById("messagerie");
     messagerie.innerHTML += `<p>${message.nom} : ${message.message}</p>` // message.nom + " : " + message.message
 
@@ -180,7 +112,6 @@ socket.on("envoie message client", message =>
 socket.on("entree dans la partie", () => {
     connecté = true
     
-    console.log("bien entree")
     let messagerie=document.getElementById("chat")
     let elem=document.getElementById("entree-nom");
     elem.style.display = "none"
@@ -194,7 +125,6 @@ socket.on("erreur",
     messageErreur => {
         let erreur=document.getElementById("erreur")
         erreur.innerHTML=messageErreur
-        console.log(messageErreur)
         setTimeout(() => {
             erreur.innerHTML=""
         }, 5000)
@@ -202,12 +132,6 @@ socket.on("erreur",
 )
 
 socket.on("envoie points client", points => {
-    /*let listePoints=document.getElementById("points")
-    listePoints.innerHTML = ""*
-    for(let i = 0; i  < points.nom.length;i++){
-        listePoints.innerHTML += ` ${points.nom[i] }/${ points.totalPointsPartie[i]} `
-    }*/
-
     for(let i = 0; i < points.nom.length; i++)
     {
         let joueurPointsDiv=document.getElementById(`j${i+1}p`)
@@ -219,7 +143,6 @@ socket.on("envoie points client", points => {
 socket.on("liste joueurs", noms => {
     let elem=document.getElementById("joueurs")
     elem.textContent=noms.nom.toString()
-    console.log("liste noms : " +  noms.nom)
 
     let nbJoueurs = document.getElementById("nombreJoueurs")
     let listeJoueurs = document.getElementById("joueurs")
@@ -248,17 +171,12 @@ socket.on("affichage noeud", noeud => {
 
     if(noeud != undefined)
     {
-        console.log(d3.select(`#${noeud.id}`))
-        console.log(d3.select(`#${noeud.id}`).node())
         selectionNoeud = noeud
         noeud.book = Object.assign(new Book(), noeud.book)
         const group = d3.select(d3.select(`#${noeud.id}`).node().parentNode)
         d3.select(`#${noeud.id}`).remove()
         d3.select(`#b${selectionNoeud.id}`).remove()
-        console.log(selectionNoeud)
         displayNode(group, noeud.coordonnees, noeud, "blue")
-        
-        //d3.select(`#${noeud?.}`).attr("fill", "blue")
     }
     else
     {
@@ -269,8 +187,50 @@ socket.on("affichage noeud", noeud => {
         displayNode(group, selectionNoeud.coordonnees, selectionNoeud)
     }
     
-    console.log(selectionNoeud)
 })
+
+
+socket.on("victoire", nom_gagnant => {
+    document.getElementById("victoire").textContent = `${nom_gagnant} a gagné la partie!`
+    document.getElementById("veil").style.display = "block"
+})
+
+//Lorsque le client recoit la liste de tout les noeuds (lorsque un joueur déplace un livre) et met a jour l'affichage
+socket.on("liste noeuds", noeuds => {
+
+    if(!dansLaPartie)
+        return;
+
+    noeuds = Object.values(noeuds) //Transforme le dictionnaire en tableau
+    
+    for (let i = 0; i < noeuds.length; i++) {
+        //enlève tout les livres
+        d3.select(`#b${noeuds[i].id}`).remove()
+        if(noeuds[i].book != undefined)
+        {
+            //Fait en sorte que les objets livres soit de la classe livre
+            noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
+            //selectionne l'element parent au noeud
+            const group = d3.select(d3.select(`#${noeuds[i].id}`).node().parentNode)
+            //affiche les livres présent
+            displayBook(group, noeuds[i].coordonnees, noeuds[i].book, noeuds[i].id)
+        }
+    }
+})
+
+socket.on("creer chariot", (noeuds) => {
+    if(!dansLaPartie)
+        return;
+
+    for (let i = 0; i < noeuds.length; i++) {
+        if(noeuds[i].book != undefined)
+            noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
+    }
+    createChariot(noeuds, 60)
+})
+
+
+//PARTIE D3
 
 //Initialisation de l'affichage lorsque la partie commence
 function initialisationAffichage(noeuds) {
@@ -331,69 +291,9 @@ function initialisationAffichage(noeuds) {
     let points=document.getElementById("points")
 
     createWheels()
-    /*
-    for(let i=0; i<nombreJoueurs; i++){
-        listeJoueurs.innerHTML += `${nomsJoueurs[i]}`
-    }
-        */
 }
 
-/*
-var svg = d3.select("svg")
-svg.append('line')
-    .attr('x1', 10)
-    .attr('y1', 50)
-    .attr('x2', 450)
-    .attr('y2', 50)
-    .attr('stroke', '#54301D')
-    .attr('stroke-width', 8)
 
-}, 200)
-*/
-
-socket.on("victoire", nom_gagnant => {
-    document.getElementById("victoire").textContent = `${nom_gagnant} a gagné la partie!`
-    document.getElementById("veil").style.display = "block"
-})
-
-//Lorsque le client recoit la liste de tout les noeuds (lorsque un joueur déplace un livre) et met a jour l'affichage
-socket.on("liste noeuds", noeuds => {
-
-    if(!dansLaPartie)
-        return;
-
-    noeuds = Object.values(noeuds) //Transforme le dictionnaire en tableau
-    
-    for (let i = 0; i < noeuds.length; i++) {
-        //enlève tout les livres
-        d3.select(`#b${noeuds[i].id}`).remove()
-        if(noeuds[i].book != undefined)
-        {
-            //Fait en sorte que les objets livres soit de la classe livre
-            noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
-            //selectionne l'element parent au noeud
-            const group = d3.select(d3.select(`#${noeuds[i].id}`).node().parentNode)
-            //affiche les livres présent
-            displayBook(group, noeuds[i].coordonnees, noeuds[i].book, noeuds[i].id)
-        }
-    }
-})
-
-socket.on("creer chariot", (noeuds) => {
-    if(!dansLaPartie)
-        return;
-
-    for (let i = 0; i < noeuds.length; i++) {
-        if(noeuds[i].book != undefined)
-            noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
-    }
-    createChariot(noeuds, 60)
-})
-
-//socket.emit("envoie message chat", {message:"Salut ca va"})
-
-
-//PARTIE D3
 function displayBook(elem, coordinate, book, id)
 {
     let bookWidth = 25
@@ -412,9 +312,6 @@ function displayBook(elem, coordinate, book, id)
 
 function displayNode(elem, coordinate, node, couleur = "white")
 {
-    console.log("display node")
-    console.log(noeudSelectionné)
-    //console.log("display node", node)
     if(node.book != null)
         displayBook(elem, coordinate, node.book, node.id)
 
@@ -433,14 +330,12 @@ function displayNode(elem, coordinate, node, couleur = "white")
             socket.emit("selection noeud", node.target.id)
         })
         .on("mouseover", (node) => {
-            console.log(noeudSelectionné)
             if(couleur == "white")
                 d3.select(`#${node.target.id}`).attr("fill", "cyan")
             else
                 d3.select(`#${node.target.id}`).attr("fill", "blue")
         })
         .on("mouseleave", (node) => {
-            console.log(noeudSelectionné)
             if(couleur == "white")
                 d3.select(`#${node.target.id}`).attr("fill", "white")
             else
@@ -483,7 +378,6 @@ function createWheels()
     for (let i = -1; i < 60; i++) {
         
         
-        console.log('creating wheels...')
         let wheelSupportSVGGroup = d3.select("svg").append("g").attr("x", 20).attr("y", 820)
         //let path = `M-280 750 L-20 750 L-50 800 L-250 800 Z`
         wheelSupportSVGGroup

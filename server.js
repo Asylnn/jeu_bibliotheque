@@ -54,29 +54,6 @@ initialisationNoeuds()
 
 let nbJoueursMax=4
 
-
-/*
-function message_chat(data)
-{
-    console.log(data.message)
-}
-
-let objjavascript = {
-    abc: "string",
-    def: "string2"
-}
-
-d = "abc"
-objjavascript.abc == objjavascript[d]
-
-*/
-/*function sortiePartie(){
-    console.log("message sortie reçu")
-    delete dict_joueurs[socket.id]
-    socket.emit("liste joueurs", getNoms())
-}
-
-*/
 function finPartie()
 {
     partieEnCours = false
@@ -136,10 +113,6 @@ function deconnection(id)
 
 io.on("connect", (socket) => {
     console.log("nouvelle connection")
-    socket.on("ping", () => {
-        console.log("pong")
-        socket.emit("pong")
-    })
     socket.emit("liste joueurs", getNoms())
 
 
@@ -168,7 +141,6 @@ io.on("connect", (socket) => {
             return;
         }
 
-        console.log("message reçu")
         jrs=Object.values(dict_joueurs)
         for(let joueur of jrs){
             if(joueur.nom == nom){
@@ -227,8 +199,7 @@ io.on("connect", (socket) => {
             //Sinon on deplace le livre au nouveau noeud
             dict_noeuds[id].book = dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book
             dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book = undefined
-            //console.log(dict_noeuds[id].book)
-            //socket.emit("confirmation mouvement livre")
+
             //On met a jour l'affichage de tout les noeuds de tout les clients
             io.emit("liste noeuds", dict_noeuds)
             dict_joueurs[socket.id].selectionNoeud = undefined
@@ -260,16 +231,15 @@ io.on("connect", (socket) => {
         if(arg == "")
             return;
 
-        console.log(arg)
-        console.log(dict_joueurs)
+
         io.emit("envoie message client", {nom:dict_joueurs[socket.id].nom, message:arg})
-    }) //le serveur reçoit le message
+    })
     
 
 
     socket.on("envoie message chat", function (data) {
-        console.log(data.message)//DZYDZIEYD
-  //      io.broadcast("donner message chat", data.message)
+
+
     })
     
 })
@@ -304,8 +274,7 @@ function getPoints(id)
         if(dict_noeuds[nIdSuiv].book == null)
             return 0
 
-        //console.log("voisin droit pas null et livre pas null")
-        //console.log(dict_noeuds[id].book)
+
    
         if ((type == "genre") && (dict_noeuds[nIdSuiv].book.genre == dict_noeuds[id].book.genre)){
                 
@@ -340,8 +309,6 @@ function getPoints(id)
         if(dict_noeuds[nIdPrec].book == null)
             return 0
 
-        //console.log("voisin gauche pas null et livre pas null")
-        //console.log(dict_noeuds[id].book.format)
         
         if ((type == "genre") && (dict_noeuds[nIdPrec].book.genre == dict_noeuds[id].book.genre)){
             return verificationVoisinGaucheApportePoints(nIdPrec, type) + 1
