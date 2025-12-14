@@ -442,13 +442,13 @@ function createChariot(nodes, time)
     let beginTime = document.getElementById("svg").getCurrentTime()
     let bookSupportSVGGroup = d3.select("svg").append("g")
 
-    let path = `M-250 750 L-50 750 L-50 800 L-250 800 Z`
+    let path = `M-280 750 L-20 750 L-50 800 L-250 800 Z`
     bookSupportSVGGroup
         .append("path")
         .attr("d", path)
-        .attr("stroke", "yellow")
-        .attr("stroke-width", 4)
-        .attr("fill", "yellow")
+        .attr("stroke", "gray")
+        .attr("stroke-width", 8)
+        .attr("fill", "white")
         
     bookSupportSVGGroup
         .append("animateTransform")
