@@ -236,13 +236,15 @@ io.on("connect", (socket) => {
             let pointsDroitG=verificationVoisinDroitApportePoints(id, "genre")
             let pointsDroitF=verificationVoisinDroitApportePoints(id, "format")
             let pointsDroitA=verificationVoisinDroitApportePoints(id, "auteur")
-            let pointsDroit=pointsDroitA+pointsDroitF+pointsDroitG
+            let pointsDroitT=verificationVoisinDroitApportePoints(id, "titre")
+            let pointsDroit=pointsDroitA+pointsDroitF+pointsDroitG+pointsDroitT
 
 
             let pointsGaucheG=verificationVoisinGaucheApportePoints(id, "genre")
             let pointsGaucheF=verificationVoisinGaucheApportePoints(id, "format")
             let pointsGaucheA=verificationVoisinGaucheApportePoints(id, "auteur")
-            let pointsGauche=pointsGaucheA+pointsGaucheF+pointsGaucheG
+            let pointsGaucheT=verificationVoisinGaucheApportePoints(id, "titre")
+            let pointsGauche=pointsGaucheA+pointsGaucheF+pointsGaucheG+pointsGaucheT
             let totalPoints=pointsDroit+pointsGauche
             dict_joueurs[socket.id].totalPointsPartie+=totalPoints
 
@@ -252,7 +254,6 @@ io.on("connect", (socket) => {
                 const tabId=tab[1]
                 const tabIdSuiv=+tabId+1
                 nIdSuiv=`${tab[0]}e${tabIdSuiv}`
-                console.log("test droit")
 
                 if(dict_noeuds[nIdSuiv] == null)
                     return 0
@@ -272,8 +273,11 @@ io.on("connect", (socket) => {
                         return verificationVoisinDroitApportePoints(nIdSuiv, type) + 1
                 }
                 else if ((type == "format") && (dict_noeuds[nIdSuiv].book.format == dict_noeuds[id].book.format)){
-                        console.log(verificationVoisinDroitApportePoints(nIdSuiv, type) + 1)
+
                         return verificationVoisinDroitApportePoints(nIdSuiv, type) + 1
+                }
+                else if ((type == "titre") && (dict_noeuds[nIdSuiv].book.titre >= dict_noeuds[id].book.titre)){
+                    return verificationVoisinDroitApportePoints(nIdSuiv, type) + 1
                 }
 
                 return 0
@@ -286,8 +290,6 @@ io.on("connect", (socket) => {
                     const tabId=tab[1]
                     const tabIdPrec=+tabId-1
                     nIdPrec=`${tab[0]}e${tabIdPrec}`
-
-                    console.log("test gauche")
                     
                 if(dict_noeuds[nIdPrec] == null)
                     return 0
@@ -306,7 +308,11 @@ io.on("connect", (socket) => {
                     return verificationVoisinGaucheApportePoints(nIdPrec, type) + 1
                 }
                 else if ((type == "format") && (dict_noeuds[nIdPrec].book.format == dict_noeuds[id].book.format)){
-                    console.log("points format gauche : " + verificationVoisinGaucheApportePoints(nIdPrec, type) + 1);
+
+                    return verificationVoisinGaucheApportePoints(nIdPrec, type) + 1
+                
+                }
+                else if ((type == "titre") && (dict_noeuds[nIdPrec].book.titre <= dict_noeuds[id].book.titre)){
 
                     return verificationVoisinGaucheApportePoints(nIdPrec, type) + 1
                 

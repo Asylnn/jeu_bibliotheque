@@ -398,7 +398,7 @@ function displayBook(elem, coordinate, book, id)
         .attr("fill", book.getColor())
         .attr("id", `b${id}`)
         .append("title")
-        .html(book.titre)
+            .html(`${book.titre} - ${book.auteur}`)
 }
 
 function displayNode(elem, coordinate, node, couleur = "white")
