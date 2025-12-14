@@ -1,6 +1,6 @@
 # Projet de programmation web L2
 
-### Lucas Ait Oulahyane, 
+### Lucas Ait Oulahyane, Leticia Napolitano
 
 Lien du dépot git (contient les images)
 
@@ -11,6 +11,7 @@ https://github.com/Asylnn/jeu_bibliotheque
 ## Fonctionnalités implementées
 
 Interface graphique simple mais fonctionnel
+![alt text](https://github.com/Asylnn/jeu_biblioteque/blob/master/partie.png?raw=true)
 
 Système de déplacement de livres grâce à un système de noeuds (petit cercles noirs): 
     pour déplacer un livre il faut clicker sur le noeud qui contient un livre cliquer ensuite sur un autre noeud qui ne contient pas de livre
@@ -27,6 +28,7 @@ Ces points sont déduit si le livre est retiré
 Système de messagerie
 
 Condition de victoire si un joueur atteint 150 points
+![alt text](https://github.com/Asylnn/jeu_biblioteque/blob/master/victoire.png?raw=true)
 
 ## Fonctionnement
 
@@ -40,7 +42,6 @@ ATTENTION! La branche par défaut est main, mais le code le plus récent est sur
 Il faut donc passer sur cette branche avant.
 ```sh
 git checkout master
-git pull origin master
 ```
 
 Il faut ensuite installer les dépendances (nécéssite que node et npm soit installé)
