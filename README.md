@@ -11,7 +11,7 @@ https://github.com/Asylnn/jeu_bibliotheque
 ## Fonctionnalités implementées
 
 Interface graphique simple mais fonctionnel
-![alt text](https://github.com/Asylnn/jeu_biblioteque/blob/master/partie.png?raw=true)
+![example partie](https://github.com/Asylnn/jeu_biblioteque/blob/master/images_example/partie.png?raw=true)
 
 Système de déplacement de livres grâce à un système de noeuds (petit cercles noirs): 
     pour déplacer un livre il faut clicker sur le noeud qui contient un livre cliquer ensuite sur un autre noeud qui ne contient pas de livre
@@ -28,7 +28,7 @@ Ces points sont déduit si le livre est retiré
 Système de messagerie
 
 Condition de victoire si un joueur atteint 150 points
-![alt text](https://github.com/Asylnn/jeu_biblioteque/blob/master/victoire.png?raw=true)
+![example victoire](https://github.com/Asylnn/jeu_biblioteque/blob/master/images_example/victoire.png?raw=true)
 
 ## Fonctionnement
 
