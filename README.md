@@ -1,6 +1,6 @@
-### Projet de programmation web L2
+# Projet de programmation web L2
 
-# Lucas Ait Oulahyane, 
+### Lucas Ait Oulahyane, 
 
 Lien du dépot git (contient les images)
 
