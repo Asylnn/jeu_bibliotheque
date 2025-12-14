@@ -13,10 +13,11 @@ https://github.com/Asylnn/jeu_bibliotheque
 Interface graphique simple mais fonctionnel
 ![example partie](https://github.com/Asylnn/jeu_bibliotheque/blob/master/images_example/partie.png?raw=true)
 
-Système de déplacement de livres grâce à un système de noeuds (petit cercles noirs): 
-    pour déplacer un livre il faut clicker sur le noeud qui contient un livre cliquer ensuite sur un autre noeud qui ne contient pas de livre
+Système de déplacement de livre grâce à un système de noeuds (petit cercles noirs): 
 
-Système de création de livres grâce à des chariot qui arrive toutes les 10 secondes
+pour déplacer un livre il faut cliquer sur le noeud qui contient un livre, et ensuite sur un autre noeud qui ne contient pas de livre
+
+Système de création de livre grâce à des chariot qui arrive toutes les 10 secondes
 
 Système de points, pour chaque livre à la suite qui on les mêmes propriétées : 
     +1 points si même genre
@@ -32,7 +33,7 @@ Condition de victoire si un joueur atteint 150 points
 
 ## Fonctionnement
 
-Pour faire tourner le serveur il faut :
+Pour faire fonctionner le serveur il faut :
 
 cloner le projet
 ```sh
