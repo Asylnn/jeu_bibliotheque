@@ -95,7 +95,6 @@ function getNoms(){
         }
 
     return {nom:noms, max:nbJoueursMax}
-    
 }
 
 function getPointsJoueurs(){
@@ -128,6 +127,13 @@ function creerChariot()
     io.emit("creer chariot", noeudsChariot)
 }
 
+function deconnection(id)
+{
+    delete dict_joueurs[id]
+    io.emit("liste joueurs", getNoms())
+    finPartie()
+}
+
 io.on("connect", (socket) => {
     console.log("nouvelle connection")
     socket.on("ping", () => {
@@ -137,23 +143,26 @@ io.on("connect", (socket) => {
     socket.emit("liste joueurs", getNoms())
 
 
-    socket.on("sortie", () => {console.log("message sortie reçu")
-        delete dict_joueurs[socket.id]
-        io.emit("liste joueurs", getNoms())
+    socket.on("sortie", () => {
+        if(dict_joueurs[socket.id] != undefined)
+            deconnection(socket.id)
     })
 
     socket.on("disconnect", () => {
-        console.log("deconnection de la part de " + socket.id)
-        delete dict_joueurs[socket.id]
-        socket.broadcast.emit("liste joueurs", getNoms())
-        //finPartie()
+        if(dict_joueurs[socket.id] != undefined)
+            deconnection(socket.id)
     })
 
     
 
     socket.on("entree", (nom) =>
     {
-
+        if(partieEnCours)
+        {
+            socket.emit("erreur", "Une partie est déjà en cours!")
+            return;
+        }
+            
         if(Object.values(dict_joueurs).length==nbJoueursMax){
             socket.emit("erreur", "Nombre de joueurs maximal atteint")
             return;
@@ -176,14 +185,15 @@ io.on("connect", (socket) => {
     })
 
     socket.on("commencer partie", () => {
-        io.emit("initialisation affichage", dict_noeuds)
-        io.emit("début partie")
+        io.emit("début partie", dict_noeuds)
         partieEnCours = true
         
-        creerChariot()
+        
         intervalChariotId = setInterval(() => {
             creerChariot()
         }, 10_000)
+
+        setTimeout(() => {creerChariot()}, 1_000)
     })
 
     socket.on("terminer partie", () => {

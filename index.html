@@ -10,35 +10,37 @@
 <body>
     <header>
         <h1>Mon Super Jeu</h1>
-        <button style="display:none" onClick="commencerLaPartie()" id="commencer">
+        <button style="display:none" onClick="envoyerMessageCommencerLaPartie()" id="commencer">
             Commencer
         </button>
-        <div id="terminerPartie">
-            <button style="display:none" onClick="terminerLaPartie()" id="terminer">
-                Terminer
-            </button>
-        </div>
-
-        <div id="deconnexion">
-            <button onClick="seDeconnecterDeLaPartie()">
+        <button style="display:none" onClick="envoyerMessageTerminerPartie()" id="terminer">
+            Terminer
+        </button>
+        <div id="deconnexion" style="display:none">
+            <button onClick="seDeconnecterDuServeur()">
                 Exit
             </button>
         </div>
     </header>
     
     <div id="page">
+        <div id="erreur">
+    
+        </div>
         <div id="entree-nom">
             <span> Veuillez entrer votre nom  
                 <input id="nom" type="text"/>
                 <button onClick="entrerDansLaPartie()">
                     Valider
                 </button>
-            </span>
+            </span><br>
+            <div>
+                <div><span id="joueurs"></span><span id="nombreJoueurs"></span></div>
+                <p id="partieEnCours" style="display:none">Partie en Cours ...</p>
+            </div>
         </div>
     
-        <div id="erreur">
-    
-        </div>
+        
     
         
         <div style="display: none;">
@@ -61,7 +63,7 @@
                 
             </div>
         
-            <p id="joueurs"></p>
+            
         </div>
         
     

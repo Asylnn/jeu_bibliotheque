@@ -2,6 +2,8 @@ console.log("hello world!")
 
 let socket = io()
 let partieEnCours = false
+let dansLaPartie = false
+let connecté = false
 let nombreJoueurs = 0
 let nomsJoueurs = []
 let totalPoints = 0
@@ -18,7 +20,6 @@ function entrerDansLaPartie(){
     //let elem=document.getElementById("entree-nom");
     socket.emit('entree', input.value);
     console.log("emit entrer")
-    console.log("entrer dans la partie")
     //elem.style.display = "none"
 
     
@@ -46,25 +47,24 @@ function entrerDansLaPartie(){
     
 }*/
 
-function seDeconnecterDeLaPartie(){
-  
+function seDeconnecterDuServeur(){
+    connecté = false
     let input=document.getElementById("nom");
     socket.emit("sortie", input.value);
-    console.log("sortie de la partie");
-    console.log("bien entree")
-
-
 
     let messagerie=document.getElementById("chat")
+    messagerie.style.display="none"
     let elem=document.getElementById("entree-nom");
-    elem.style.display = "flex"
-    socket.disconnect();
+    elem.style.display = "block"
+    document.getElementById("deconnexion").style.display = "none";
+
+    terminerLaPartie()
     
 
 
     /*let messagerie=document.getElementById("messagerie")
     let elem=document.getElementById("entree-nom");*/
-    let joueurs=document.getElementById("joueurs");
+    /*let joueurs=document.getElementById("joueurs");
     let commencer=document.getElementById("commencer");
     let terminerPartie=document.getElementById("terminerPartie");
     let deconnexion=document.getElementById("deconnexion");
@@ -77,14 +77,14 @@ function seDeconnecterDeLaPartie(){
     joueurs.style.display="none";
     commencer.style.display = "none";
     terminerPartie.style.display = "none";
-    deconnexion.style.display = "none";
+    deconnexion
     nombreJoueurs.style.display = "none";
     points.style.display = "none";
     tableau.style.display = "none";
     elem.style.display = "block"
-    messagerie.style.display="none"
+    
     let svg = d3.select("svg");
-    svg.selectAll("*").remove();
+    svg.selectAll("*").remove();*/
 
 
 
@@ -101,20 +101,23 @@ function envoyerUnMessage(){
     console.log("message envoyé")
 }
 
-function testAffichageBoutonCommencerTerminer(nbJoueurs)
+function testAffichageBoutonCommencerTerminer()
 {
-    console.log("test affichage")
-    console.log(partieEnCours)
     let boutonCommencer = document.getElementById("commencer")
     let boutonTerminer = document.getElementById("terminer")
-    if(partieEnCours){
+    if(! connecté)
+    {
+        boutonTerminer.style.display = "none"
+        boutonCommencer.style.display = "none"
+    }
+    else if(partieEnCours){
         boutonTerminer.style.display = "inline"
         boutonCommencer.style.display = "none"
     }
     else
     {
         boutonTerminer.style.display = "none"
-        if(nbJoueurs >= 2)
+        if(nombreJoueurs >= 2)
             boutonCommencer.style.display = "inline"
         else
             boutonCommencer.style.display = "none"
@@ -122,36 +125,42 @@ function testAffichageBoutonCommencerTerminer(nbJoueurs)
     
 }
 
-function commencerLaPartie()
+function envoyerMessageCommencerLaPartie()
 {
-    partieEnCours = true
-    testAffichageBoutonCommencerTerminer(2)
     socket.emit("commencer partie")
-    
+}
+
+function envoyerMessageTerminerPartie()
+{
+    socket.emit("terminer partie")
 }
 
 function terminerLaPartie()
-{
-   
+ {
     partieEnCours = false
-    testAffichageBoutonCommencerTerminer(0)
-    socket.emit("terminer partie")
+    dansLaPartie = false
+    testAffichageBoutonCommencerTerminer()
 
+    let svg = d3.select("svg")
+    svg.selectAll("*").remove();
+ }
+
+socket.on("début partie", (noeuds) => {
+    partieEnCours = true
     
-}
+    testAffichageBoutonCommencerTerminer()
 
-socket.on("début partie", () => {
-    document.getElementById("commencer").style.display = "none"
-    document.getElementById("terminer").style.display = "inline"
+    if(connecté)
+    {
+        dansLaPartie = true
+        initialisationAffichage(noeuds)
+    }
+    
 })
 
 
 socket.on("fin partie", () => {
-    document.getElementById("commencer").style.display = "inline"
-    document.getElementById("terminer").style.display = "none"
-
-    let svg = d3.select("svg")
-    svg.selectAll("*").remove();
+    terminerLaPartie()
 })
 
 
@@ -164,11 +173,14 @@ socket.on("envoie message client", message =>
 })
 
 socket.on("entree dans la partie", () => {
+    connecté = true
+    
     console.log("bien entree")
     let messagerie=document.getElementById("chat")
     let elem=document.getElementById("entree-nom");
     elem.style.display = "none"
     messagerie.style.display="flex"
+    document.getElementById("deconnexion").style.display = "inline";
 
 })
 
@@ -180,7 +192,7 @@ socket.on("erreur",
         console.log(messageErreur)
         setTimeout(() => {
             erreur.innerHTML=""
-        }, 10000)
+        }, 5000)
     }
 )
 
@@ -204,24 +216,31 @@ socket.on("liste joueurs", noms => {
     elem.textContent=noms.nom.toString()
     console.log("liste noms : " +  noms.nom)
 
-    /*let listeJoueurs=document.getElementById("nombreJoueurs")
-    listeJoueurs.innerHTML = `${noms.nom.length}/${noms.max}`*/
+    let nbJoueurs = document.getElementById("nombreJoueurs")
+    let listeJoueurs = document.getElementById("joueurs")
+    nbJoueurs.innerHTML = `(${noms.nom.length}/${noms.max})`
+    listeJoueurs.textContent = 'Joueurs : '
+
     nombreJoueurs = noms.nom.length
-    nomsJoueurs = noms.nom
+
     for(let i = 0; i < noms.nom.length; i++)
     {
         let joueurDiv=document.getElementById(`j${i+1}`)
         joueurDiv.textContent = noms.nom[i]
+        listeJoueurs.textContent += noms.nom[i] + (i != noms.nom.length - 1 ? ',' : '') + ' '
     }
-    testAffichageBoutonCommencerTerminer(noms.nom.length)
+    testAffichageBoutonCommencerTerminer()
     
     
 })
 
 
 socket.on("affichage noeud", noeud => {
-    console.log("HHHHEEEELLLLOOOOOOO")
-    console.log(noeud)
+
+    if(!dansLaPartie)
+        return;
+
+
     if(noeud != undefined)
     {
         console.log(d3.select(`#${noeud.id}`))
@@ -249,7 +268,8 @@ socket.on("affichage noeud", noeud => {
 })
 
 //Initialisation de l'affichage lorsque la partie commence
-socket.on("initialisation affichage", noeuds => {
+function initialisationAffichage(noeuds) {
+
     let svg = d3.select("svg")
 
     //etageres
@@ -309,8 +329,7 @@ socket.on("initialisation affichage", noeuds => {
         listeJoueurs.innerHTML += `${nomsJoueurs[i]}`
     }
         */
-   
-})
+}
 
 /*
 var svg = d3.select("svg")
@@ -328,6 +347,10 @@ svg.append('line')
 
 //Lorsque le client recoit la liste de tout les noeuds (lorsque un joueur déplace un livre) et met a jour l'affichage
 socket.on("liste noeuds", noeuds => {
+
+    if(!dansLaPartie)
+        return;
+
     noeuds = Object.values(noeuds) //Transforme le dictionnaire en tableau
     
     for (let i = 0; i < noeuds.length; i++) {
@@ -346,6 +369,9 @@ socket.on("liste noeuds", noeuds => {
 })
 
 socket.on("creer chariot", (noeuds) => {
+    if(!dansLaPartie)
+        return;
+
     for (let i = 0; i < noeuds.length; i++) {
         if(noeuds[i].book != undefined)
             noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
@@ -410,24 +436,6 @@ function displayNode(elem, coordinate, node, couleur = "white")
                 d3.select(`#${node.target.id}`).attr("fill", "blue")
         })
 }
-
-/*function createBookSupport(nodes)
-{
-    let bookSupportSVGGroup = d3.select("svg").append("g")
-    
-    let path = `M100 400 L300 400 L 300 450 L100 450 Z`
-    bookSupportSVGGroup
-        .append("path")
-        .attr("d", path)
-        .attr("stroke", "yellow")
-        .attr("stroke-width", 4)
-        .attr("fill", "yellow")
-        
-
-    for (let i = 0; i < 3; i++) {
-        displayNode(bookSupportSVGGroup, [120 + i*30, 400], nodes[i])
-    }
-}*/
 
 function createChariot(nodes, time)
 {   
