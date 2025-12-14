@@ -1,13 +1,12 @@
 const express = require('express')
 const books = require('./public/books.json')
-const Book = require('./public/book.js')
 const app = express()
 app.use(express.static('public'))
 const http = require('http')
 const server = http.createServer(app)
 const io = new require("socket.io")(server)
-let counterNoeudsChariot = 0
-let partieEnCours = false
+
+
 server.listen(8887, () => {
     console.log("listen on port 8887")
 })
@@ -27,13 +26,18 @@ class Joueur{
 
 let dict_joueurs={}
 let dict_noeuds={}
-let nb=30;
-let cmp=150;
-let h=420;
+let nbJoueursMax=4
+let counterNoeudsChariot = 0
+let partieEnCours = false
 let intervalChariotId;
 
+//Initialisation du dictionnaire des noeuds avec leur position
 function initialisationNoeuds()
 {
+    let nb=30;
+    let cmp=150;
+    let h=420;
+
     dict_noeuds = {}
     for(let k=0; k < 3; k++){
         for(let j=0; j < 3; j++){
@@ -52,28 +56,36 @@ function initialisationNoeuds()
 
 initialisationNoeuds()
 
-let nbJoueursMax=4
 
+//Lorsque la partie ce termine
 function finPartie()
 {
     partieEnCours = false
     io.emit("fin partie")
+    for(let joueur of Object.values(dict_joueurs))
+    {
+        joueur.totalPointsPartie = 0
+    }
+    io.emit("envoie points client", getPointsJoueurs())
     counterNoeudsChariot = 0
     clearInterval(intervalChariotId)
+    //Reinitialise le dictionnaire de noeuds
     initialisationNoeuds()
 }
 
+//Fonction qui obtient tout les noms des joueurs
 function getNoms(){
     jrs=Object.values(dict_joueurs)
     noms=[]
  
-     for(let joueur of jrs){
-            noms.push(joueur.nom)
-        }
+    for(let joueur of jrs){
+        noms.push(joueur.nom)
+    }
 
     return {nom:noms, max:nbJoueursMax}
 }
 
+//Fonction qui obtient tout les points de tout les joueurs
 function getPointsJoueurs(){
     jrs=Object.values(dict_joueurs)
     points=[]
@@ -86,6 +98,7 @@ function getPointsJoueurs(){
     return {nom:noms, totalPointsPartie:points}
 }
 
+//Fonction qui crée les noeuds nécéssaire pour le chariot
 function creerChariot()
 {
     let noeudsChariot = []
@@ -104,6 +117,7 @@ function creerChariot()
     io.emit("creer chariot", noeudsChariot)
 }
 
+//Fonction qui s'execute lors de la deconnection d'un joueur
 function deconnection(id)
 {
     delete dict_joueurs[id]
@@ -111,23 +125,27 @@ function deconnection(id)
     finPartie()
 }
 
+//Lorsque un joeur se connecte...
 io.on("connect", (socket) => {
     console.log("nouvelle connection")
+
+    //On envoit la liste de tout les joueurs
     socket.emit("liste joueurs", getNoms())
 
-
+    //Losrque un joueur appuie sur le bouton "exit"
     socket.on("sortie", () => {
         if(dict_joueurs[socket.id] != undefined)
             deconnection(socket.id)
     })
 
+    //Si le socket se deconnecte
     socket.on("disconnect", () => {
         if(dict_joueurs[socket.id] != undefined)
             deconnection(socket.id)
     })
 
     
-
+    //Lorsque un joueur veux rentrer dans le lobby
     socket.on("entree", (nom) =>
     {
         if(partieEnCours)
@@ -136,7 +154,7 @@ io.on("connect", (socket) => {
             return;
         }
             
-        if(Object.values(dict_joueurs).length==nbJoueursMax){
+        if(Object.values(dict_joueurs).length == nbJoueursMax){
             socket.emit("erreur", "Nombre de joueurs maximal atteint")
             return;
         }
@@ -153,25 +171,30 @@ io.on("connect", (socket) => {
 
         dict_joueurs[socket.id]= new Joueur(socket.id, nom)
         io.emit("liste joueurs", getNoms())
-        io.emit("envoie points client", getPointsJoueurs())
+        //io.emit("envoie points client", getPointsJoueurs())
     })
 
+    //Lorsque un joueur veut débuter la partie
     socket.on("commencer partie", () => {
         io.emit("début partie", dict_noeuds)
         partieEnCours = true
         
-        
-        intervalChariotId = setInterval(() => {
+        //On crée un timeout, le temps que les clients recoivent le message 
+        setTimeout(() => {
             creerChariot()
-        }, 10_000)
-
-        setTimeout(() => {creerChariot()}, 1_000)
+            //On créer un interval, pour qu'un chariot apparaisse toutes les 10 secondes
+            intervalChariotId = setInterval(() => {
+                creerChariot()
+            }, 10_000)
+        }, 1_000)
     })
 
+    //Lorsque un joueur veut terminer la partie
     socket.on("terminer partie", () => {
         finPartie()
     })
 
+    //Losque un joueur selectionne un noeud
     socket.on("selection noeud", id => {
 
         //Si le joueur n'est pas dans la partie alors il ne ce passe rien
@@ -192,16 +215,19 @@ io.on("connect", (socket) => {
             socket.emit("affichage noeud", dict_noeuds[id])
             dict_joueurs[socket.id].selectionNoeud = id
         }
-            
+        //Si le joeur a un noeud selectionné et qu'il a selectionné un noeud qui n'a pas de livre, alors il déplace le livre au nouveau noeud
         else {
             socket.emit("affichage noeud", undefined)
+            //Le joueur perd les points que lui aurait rapporté de placer le livre déplacé à son emplacement
             let pointsNegatif = getPoints(dict_joueurs[socket.id].selectionNoeud)
-            //Sinon on deplace le livre au nouveau noeud
+
+            //On deplace le livre
             dict_noeuds[id].book = dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book
             dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book = undefined
 
             //On met a jour l'affichage de tout les noeuds de tout les clients
             io.emit("liste noeuds", dict_noeuds)
+            //Le joueur deselectionne le noeud
             dict_joueurs[socket.id].selectionNoeud = undefined
 
             let points = getPoints(id)
@@ -210,6 +236,7 @@ io.on("connect", (socket) => {
 
             socket.emit("envoie points client", getPointsJoueurs())
 
+            //Si le joueur a assez de points pour gagner la partie...
             if(dict_joueurs[socket.id].totalPointsPartie > 150)
             {
                 socket.emit("victoire", dict_joueurs[socket.id].nom)
@@ -224,7 +251,7 @@ io.on("connect", (socket) => {
  
 )
     
-
+    //Lorsque le serveur recoit un message
     socket.on("message", (arg) => 
     {
 
@@ -235,39 +262,45 @@ io.on("connect", (socket) => {
         io.emit("envoie message client", {nom:dict_joueurs[socket.id].nom, message:arg})
     })
     
-
-
-    socket.on("envoie message chat", function (data) {
-
-
-    })
-    
 })
 
+/*
+    La fonction qui permet d'obtenir les points lorsque on place un livre
+    A l'interieur de la fonction on definit une fonction recursive qui calcule si son voisin de gauche ou de droite a une propriété identique. si c'est le cas,
+    alors la fonction va aussi verifier dans la même direction si la même propriété est identique (ou par ordre alphabétique...)
+*/
 function getPoints(id)
 {
-    let pointsDroitG=verificationVoisinDroitApportePoints(id, "genre")
-    let pointsDroitF=verificationVoisinDroitApportePoints(id, "format")
-    let pointsDroitA=verificationVoisinDroitApportePoints(id, "auteur")
-    let pointsDroitT=verificationVoisinDroitApportePoints(id, "titre")
-    let pointsDroit=pointsDroitA+pointsDroitF+pointsDroitG+pointsDroitT
-
-
-    let pointsGaucheG=verificationVoisinGaucheApportePoints(id, "genre")
-    let pointsGaucheF=verificationVoisinGaucheApportePoints(id, "format")
-    let pointsGaucheA=verificationVoisinGaucheApportePoints(id, "auteur")
-    let pointsGaucheT=verificationVoisinGaucheApportePoints(id, "titre")
-    let pointsGauche=pointsGaucheA+pointsGaucheF+pointsGaucheG+pointsGaucheT
-    let totalPoints=pointsDroit+pointsGauche
+    let points = 0
+    //Par exemple, on check ici si le voisin de droite a le même genre que le livre du noeud selectionné, on fait ca pour toutes les combinaisons possibles.
+    points += verificationVoisinApportePoints(id, "genre", "droite")
+    points += verificationVoisinApportePoints(id, "format", "droite")
+    points += verificationVoisinApportePoints(id, "auteur", "droite")
+    points += verificationVoisinApportePoints(id, "titre", "droite")
+    points += verificationVoisinApportePoints(id, "genre", "gauche")
+    points += verificationVoisinApportePoints(id, "format", "gauche")
+    points += verificationVoisinApportePoints(id, "auteur", "gauche")
+    points += verificationVoisinApportePoints(id, "titre", "gauche")
     
-    return totalPoints
+    return points
 
-    function verificationVoisinDroitApportePoints(id, type){
+    function verificationVoisinApportePoints(id, type, direction){
+
+        //On obtient la portion de l'id qui correspond a la position sur l'étagère
         const tab=id.split("e")
         const tabId=tab[1]
-        const tabIdSuiv=+tabId+1
+        let tabIdSuiv
+
+        //Si on verifie a droite, alors on ajoute 1, sinon on soustrait 1
+        if(direction == "droite")
+            tabIdSuiv = +tabId+1
+        else
+            tabIdSuiv = +tabId-1
+
+        //On reconstruit l'id du noeud
         nIdSuiv=`${tab[0]}e${tabIdSuiv}`
 
+        //Si le noeud n'existe pas, ou alors qu'il n'y a pas de livre, on retourne 0 points
         if(dict_noeuds[nIdSuiv] == null)
             return 0
 
@@ -275,28 +308,31 @@ function getPoints(id)
             return 0
 
 
-   
+        //Si le voisin a un genre identique
         if ((type == "genre") && (dict_noeuds[nIdSuiv].book.genre == dict_noeuds[id].book.genre)){
                 
-                return verificationVoisinDroitApportePoints(nIdSuiv, type) + 1
+                return verificationVoisinApportePoints(nIdSuiv, type, direction) + 1
         }
+        //Si le voisin a un auteur identique
         else if ((type == "auteur") && (dict_noeuds[nIdSuiv].book.auteur == dict_noeuds[id].book.auteur)){
                 
-                return verificationVoisinDroitApportePoints(nIdSuiv, type) + 1
+                return verificationVoisinApportePoints(nIdSuiv, type, direction) + 1
         }
+        //Si le voisin a un format identique
         else if ((type == "format") && (dict_noeuds[nIdSuiv].book.format == dict_noeuds[id].book.format)){
 
-                return verificationVoisinDroitApportePoints(nIdSuiv, type) + 1
+                return verificationVoisinApportePoints(nIdSuiv, type, direction) + 1
         }
+        //Si le voisin a un titre dans l'ordre alphabetique
         else if ((type == "titre") && (dict_noeuds[nIdSuiv].book.titre >= dict_noeuds[id].book.titre)){
-            return verificationVoisinDroitApportePoints(nIdSuiv, type) + 2
+            return verificationVoisinApportePoints(nIdSuiv, type, direction) + 2
         }
 
         return 0
         
         
     }
-
+/*
     function verificationVoisinGaucheApportePoints(id, type){
             const tab=id.split("e")
             const tabId=tab[1]
@@ -330,5 +366,5 @@ function getPoints(id)
 
         return 0
         
-    }
+    }*/
 }

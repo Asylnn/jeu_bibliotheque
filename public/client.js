@@ -3,38 +3,56 @@ let partieEnCours = false
 let dansLaPartie = false
 let connecté = false
 let nombreJoueurs = 0
-let nomsJoueurs = []
-let totalPoints = 0
-let noeudSelectionné = {}
 
 
+//lorsque on appuit sur le bouton "envoyer", le client fait une demande d'entrée dans le lobby
 function entrerDansLaPartie(){
-    let input=document.getElementById("nom");
+    let input = document.getElementById("nom");
     socket.emit('entree', input.value);
-
 }
 
-function seDeconnecterDuServeur(){
-    connecté = false
-    let input=document.getElementById("nom");
-    socket.emit("sortie", input.value);
-
-    let messagerie=document.getElementById("chat")
-    messagerie.style.display="none"
-    let elem=document.getElementById("entree-nom");
-    elem.style.display = "block"
-    document.getElementById("deconnexion").style.display = "none";
-
-    terminerLaPartie()
+//Si celle ci est accepté, alors il rejoint le lobby
+socket.on("entree dans la partie", () => {
+    connecté = true
     
-}
+    document.getElementById("chat").style.display = "flex"
+    document.getElementById("entree-nom").style.display="none"
+    document.getElementById("deconnexion").style.display = "inline";
 
+})
+
+//Lorsque on envoye un message dans le chat
 function envoyerUnMessage(){
-    let input=document.getElementById("message");
+    let input = document.getElementById("message");
     socket.emit("message", input.value);
     input.value=""
 }
 
+//Lorsque on recoit un message du serveur de la part de l'un des autres clients
+socket.on("envoie message client", message => 
+{
+    let messagerie = document.getElementById("messagerie");
+    messagerie.innerHTML += `<p>${message.nom} : ${message.message}</p>` 
+
+})
+
+//Lorsque on appuit sur le boutton "commencer", ca envoit un message au serveur de commencer la partie
+function envoyerMessageCommencerLaPartie()
+{
+    socket.emit("commencer partie")
+}
+
+//Lorsque on appuit sur le boutton "terminer", ca envoit un message au serveur de terminer la partie
+function envoyerMessageTerminerPartie()
+{
+    socket.emit("terminer partie")
+}
+
+/*Cette fonction determine si on doit afficher les bouttons "commencer" et "terminer"
+    Si le joueur n'est pas dans le lobby ou la partie, alors il ne voit aucun des deux
+    Si une partie est en cours, alors le bouton "terminer" s'affiche
+    Si une partie n'est pas en cours et si il y a au moins de joueurs dans le lobby, alors on affiche le boutton "commencer"
+*/
 function testAffichageBoutonCommencerTerminer()
 {
     let boutonCommencer = document.getElementById("commencer")
@@ -59,30 +77,8 @@ function testAffichageBoutonCommencerTerminer()
     
 }
 
-function envoyerMessageCommencerLaPartie()
-{
-    socket.emit("commencer partie")
-}
 
-function envoyerMessageTerminerPartie()
-{
-    socket.emit("terminer partie")
-}
-
-function terminerLaPartie()
- {
-    partieEnCours = false
-    dansLaPartie = false
-
-    document.getElementById("victoire").textContent = ``
-    document.getElementById("veil").style.display = "none"
-
-    testAffichageBoutonCommencerTerminer()
-
-    let svg = d3.select("svg")
-    svg.selectAll("*").remove();
- }
-
+//Lorsque une partie débute
 socket.on("début partie", (noeuds) => {
     partieEnCours = true
     
@@ -96,100 +92,133 @@ socket.on("début partie", (noeuds) => {
     
 })
 
-
-socket.on("fin partie", () => {
-    terminerLaPartie()
-})
-
-
-socket.on("envoie message client", message => 
-{
-    let messagerie=document.getElementById("messagerie");
-    messagerie.innerHTML += `<p>${message.nom} : ${message.message}</p>` // message.nom + " : " + message.message
-
-})
-
-socket.on("entree dans la partie", () => {
-    connecté = true
-    
-    let messagerie=document.getElementById("chat")
-    let elem=document.getElementById("entree-nom");
-    elem.style.display = "none"
-    messagerie.style.display="flex"
-    document.getElementById("deconnexion").style.display = "inline";
-
-})
-
-
-socket.on("erreur", 
-    messageErreur => {
-        let erreur=document.getElementById("erreur")
-        erreur.innerHTML=messageErreur
-        setTimeout(() => {
-            erreur.innerHTML=""
-        }, 5000)
-    }
-)
-
+//Lorsque un joueur fait des points, on recoit du serveur la totalité des points de tout le monde
 socket.on("envoie points client", points => {
+    //On affiche le nombre de points de tout les joueurs
     for(let i = 0; i < points.nom.length; i++)
     {
         let joueurPointsDiv=document.getElementById(`j${i+1}p`)
         joueurPointsDiv.textContent = points.totalPointsPartie[i]
     }
-    
 })
 
+//Lorsque un joueur se connecte ou se deconnecte, le client recoit la liste des joueurs dans le lobby
 socket.on("liste joueurs", noms => {
-    let elem=document.getElementById("joueurs")
-    elem.textContent=noms.nom.toString()
 
+    //On affiche le nombre de joueurs actuelle dans la partie, et le nombre maximum
     let nbJoueurs = document.getElementById("nombreJoueurs")
-    let listeJoueurs = document.getElementById("joueurs")
     nbJoueurs.innerHTML = `(${noms.nom.length}/${noms.max})`
+
+    //On affiche la liste des joueurs
+    let listeJoueurs = document.getElementById("joueurs")
     listeJoueurs.textContent = 'Joueurs : '
 
     nombreJoueurs = noms.nom.length
 
+    //On affiche la liste des joueurs sur le tableau de chat (qui n'est visible que après que la partie est commencé)
     for(let i = 0; i < noms.nom.length; i++)
     {
         let joueurDiv=document.getElementById(`j${i+1}`)
         joueurDiv.textContent = noms.nom[i]
         listeJoueurs.textContent += noms.nom[i] + (i != noms.nom.length - 1 ? ',' : '') + ' '
     }
+
+    //On teste si on doit afficher les boutons commencer et terminer
     testAffichageBoutonCommencerTerminer()
-    
-    
 })
 
 
+//Lorsque la partie ce termine
+socket.on("fin partie", () => {
+    terminerLaPartie()
+})
+
+//lorsque on appuit sur le bouton "exit", il fait quitter le joueur du lobby/la partie en cours
+function seDeconnecterDuServeur(){
+    connecté = false
+
+    document.getElementById("chat").style.display="none"
+    document.getElementById("deconnexion").style.display = "none";
+    document.getElementById("entree-nom").style.display = "block"
+    
+
+    //normalement pas besoin de faire ceci puisque le serveur envoie ce message après la sortie d'un joueur dans la partie
+    terminerLaPartie()
+}
+
+//Lorsque une demande de terminer la partie est recu, on enlève le jeu ainsi que le message de victoire de l'affichage
+function terminerLaPartie()
+ {
+    partieEnCours = false
+    dansLaPartie = false
+
+    //On n'affiche plus le message de victoire
+    document.getElementById("victoire").textContent = ``
+    document.getElementById("veil").style.display = "none"
+
+    testAffichageBoutonCommencerTerminer()
+
+    //On retire absolument tout du svg, on réinitialise l'affichage
+    d3.select("svg").selectAll("*").remove();
+ }
+
+
+//Lorsque le client recoit une erreur de la part du serveur
+socket.on("erreur", messageErreur => {
+    //On affiche l'erreur recu
+    let erreur = document.getElementById("erreur")
+    erreur.innerHTML = messageErreur
+
+
+    //Après un certain temps, on enlève le message de l'affichage
+    setTimeout(() => {
+        erreur.innerHTML=""
+    }, 4_000)
+})
+
+//Lorsque le serveur nous demande de mettre a jour l'affichage d'un noeud lorsque un livre est deplacé, ou lorsque le joueur clique sur un livre pour que le noeud s'affiche en bleu.
 socket.on("affichage noeud", noeud => {
 
     if(!dansLaPartie)
         return;
 
-
+    //Si on selectionne un noeud avec un livre ...
     if(noeud != undefined)
     {
+        //(On enregistre ce noeud)
         selectionNoeud = noeud
+        //Cette ligne est nécessaire, car les livres qui viennent sur serveur n'ont pas les methodes de la classe Book
         noeud.book = Object.assign(new Book(), noeud.book)
+        //On obtient le svg qui contient le noeud
         const group = d3.select(d3.select(`#${noeud.id}`).node().parentNode)
+        
+
+        //On ne devrait pas devoir toucher aux livres qui est géré par 'liste noeuds', mais ca ne marche pas? 
+        //Probablement que les deux fonctions s'execute en même temps et que cela pose problème car le noeud n'existe pas car on le retire pendant un certains temps...?
+        d3.select(`#b${noeud.id}`).remove()
+
+        //... Alors on supprime le noeud et le réaffiche en bleu 
+        // (facon un peu bizarre de faire, mais il y a des difficultées a juste changer la propriété fill de celui ci est controllée par les mouseon et mouseover events)
         d3.select(`#${noeud.id}`).remove()
-        d3.select(`#b${selectionNoeud.id}`).remove()
         displayNode(group, noeud.coordonnees, noeud, "blue")
     }
+    //Si on selectionne un livre sans noeud (donc qu'on deplace celui ci) ...
     else
     {
         selectionNoeud.book = Object.assign(new Book(), selectionNoeud.book)
         const group = d3.select(d3.select(`#${selectionNoeud.id}`).node().parentNode)
-        d3.select(`#${selectionNoeud.id}`).remove()
+        
+        
         d3.select(`#b${selectionNoeud.id}`).remove()
+
+        //Alors on supprime le noeud et on le réaffiche normalement
+        d3.select(`#${selectionNoeud.id}`).remove()
         displayNode(group, selectionNoeud.coordonnees, selectionNoeud)
     }
     
 })
 
-
+//Lorsque un joueur gagne la partie
 socket.on("victoire", nom_gagnant => {
     document.getElementById("victoire").textContent = `${nom_gagnant} a gagné la partie!`
     document.getElementById("veil").style.display = "block"
@@ -201,14 +230,16 @@ socket.on("liste noeuds", noeuds => {
     if(!dansLaPartie)
         return;
 
-    noeuds = Object.values(noeuds) //Transforme le dictionnaire en tableau
+    //Transforme le dictionnaire en tableau
+    noeuds = Object.values(noeuds) 
     
     for (let i = 0; i < noeuds.length; i++) {
         //enlève tout les livres
         d3.select(`#b${noeuds[i].id}`).remove()
+
         if(noeuds[i].book != undefined)
         {
-            //Fait en sorte que les objets livres soit de la classe livre
+            //Fait en sorte que les objets livres soit de la classe Book
             noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
             //selectionne l'element parent au noeud
             const group = d3.select(d3.select(`#${noeuds[i].id}`).node().parentNode)
@@ -218,10 +249,12 @@ socket.on("liste noeuds", noeuds => {
     }
 })
 
+//Lorsque le serveur demande la création d'un nouveau chariot
 socket.on("creer chariot", (noeuds) => {
     if(!dansLaPartie)
         return;
 
+    //Fait en sorte que les objets livres soit de la classe Book
     for (let i = 0; i < noeuds.length; i++) {
         if(noeuds[i].book != undefined)
             noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
@@ -279,21 +312,20 @@ function initialisationAffichage(noeuds) {
     
     for (let i = 0; i < noeuds.length; i++) {
         if(noeuds[i].book != undefined)
-            noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
+        {
             //Fait en sorte que les objets livres soit de la classe livre
+            noeuds[i].book = Object.assign(new Book(), noeuds[i].book)
+        }
+            
+            
+            
         displayNode(svg, noeuds[i].coordonnees, noeuds[i])
     }
-
-
-
-
-    let listeJoueurs=document.getElementById("nombreJoueurs")
-    let points=document.getElementById("points")
 
     createWheels()
 }
 
-
+//Affichage des livres
 function displayBook(elem, coordinate, book, id)
 {
     let bookWidth = 25
@@ -310,6 +342,7 @@ function displayBook(elem, coordinate, book, id)
             .html(`${book.titre} - ${book.auteur}`)
 }
 
+//Afiche les noeuds
 function displayNode(elem, coordinate, node, couleur = "white")
 {
     if(node.book != null)
@@ -330,8 +363,10 @@ function displayNode(elem, coordinate, node, couleur = "white")
             socket.emit("selection noeud", node.target.id)
         })
         .on("mouseover", (node) => {
+            //Si la couleur du noeud est "normal"
             if(couleur == "white")
                 d3.select(`#${node.target.id}`).attr("fill", "cyan")
+            //sinon on garde la couleur bleu
             else
                 d3.select(`#${node.target.id}`).attr("fill", "blue")
         })
@@ -343,9 +378,13 @@ function displayNode(elem, coordinate, node, couleur = "white")
         })
 }
 
+//Crée le chariot sur le svg
 function createChariot(nodes, time)
-{   
+{
+    //Puisque les animations commence au moment que leur parent est crée, on est obligé d'enregistrer le temps
+    //que c'est écoulé depuis la création du SVG, et de donner cette valeur comme moment ou commence l'animation
     let beginTime = document.getElementById("svg").getCurrentTime()
+
     let bookSupportSVGGroup = d3.select("svg").append("g")
 
     let path = `M-280 750 L-20 750 L-50 800 L-250 800 Z`
@@ -373,6 +412,7 @@ function createChariot(nodes, time)
     }
 }
 
+//Affiche les roues 
 function createWheels()
 {   
     for (let i = -1; i < 60; i++) {
