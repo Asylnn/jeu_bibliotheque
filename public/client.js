@@ -53,9 +53,9 @@ function seDeconnecterDeLaPartie(){
     socket.emit("sortie", input.value);
     console.log("sortie de la partie");
     console.log("bien entree")
-    let messagerie=document.getElementById("messagerie")
+    let messagerie=document.getElementById("chat")
     let elem=document.getElementById("entree-nom");
-    elem.style.display = "block"
+    elem.style.display = "flex"
     messagerie.style.display="none"
 }
 
@@ -108,10 +108,10 @@ function terminerLaPartie()
 
 socket.on("entree dans la partie", () => {
     console.log("bien entree")
-    let messagerie=document.getElementById("messagerie")
+    let messagerie=document.getElementById("chat")
     let elem=document.getElementById("entree-nom");
     elem.style.display = "none"
-    messagerie.style.display="block"
+    messagerie.style.display="flex"
 
 })
 
@@ -124,7 +124,7 @@ socket.on("début partie", () => {
 socket.on("fin partie", () => {
     document.getElementById("commencer").style.display = "inline"
     document.getElementById("terminer").style.display = "none"
-    let elem=document.getElementById("messagerie");
+    let elem=document.getElementById("chat");
     elem.style.display="none"
 
     let svg = d3.select("svg")
@@ -152,10 +152,16 @@ socket.on("erreur",
 )
 
 socket.on("envoie points client", points => {
-    let listePoints=document.getElementById("points")
-    listePoints.innerHTML =""
+    /*let listePoints=document.getElementById("points")
+    listePoints.innerHTML = ""*
     for(let i = 0; i  < points.nom.length;i++){
         listePoints.innerHTML += ` ${points.nom[i] }/${ points.totalPointsPartie[i]} `
+    }*/
+
+    for(let i = 0; i < points.nom.length; i++)
+    {
+        let joueurPointsDiv=document.getElementById(`j${i+1}p`)
+        joueurPointsDiv.textContent = points.totalPointsPartie[i]
     }
     
 })
@@ -165,10 +171,15 @@ socket.on("liste joueurs", noms => {
     elem.textContent=noms.nom.toString()
     console.log("liste noms : " +  noms.nom)
 
-    let listeJoueurs=document.getElementById("nombreJoueurs")
-    listeJoueurs.innerHTML = `${noms.nom.length}/${noms.max}`
+    /*let listeJoueurs=document.getElementById("nombreJoueurs")
+    listeJoueurs.innerHTML = `${noms.nom.length}/${noms.max}`*/
     nombreJoueurs = noms.nom.length
-    nomsJoueurs=noms.nom
+    nomsJoueurs = noms.nom
+    for(let i = 0; i < noms.nom.length; i++)
+    {
+        let joueurDiv=document.getElementById(`j${i+1}`)
+        joueurDiv.textContent = noms.nom[i]
+    }
     testAffichageBoutonCommencerTerminer(noms.nom.length)
     
     
@@ -212,14 +223,14 @@ socket.on("initialisation affichage", noeuds => {
 
     for(let i=0; i < 3; i++){
 
-        let nb=540;
+        let nb=420;
         let cmp=150;
         for(let j=0; j < 4; j++){
             svg.append('line')
                 .attr('x1', 10+i*nb)
-                .attr('y1', 50+j*cmp)
-                .attr('x2', 450+i*nb)
-                .attr('y2', 50+j*cmp)
+                .attr('y1', 20+j*cmp)
+                .attr('x2', 395+i*nb)
+                .attr('y2', 20+j*cmp)
                 .attr('stroke', '#54301D')
                 .attr('stroke-width', 8)
         }
@@ -228,16 +239,16 @@ socket.on("initialisation affichage", noeuds => {
 
         svg.append('line')
             .attr('x1', 10+i*nb)
-            .attr('y1', 46)
+            .attr('y1', 16)
             .attr('x2', 10+i*nb)
-            .attr('y2', 640)
+            .attr('y2', 610)
             .attr('stroke', '#54301D')
             .attr('stroke-width', 8)
         svg.append('line')
-            .attr('x1', 450+i*nb)
-            .attr('y1', 46)
-            .attr('x2', 450+i*nb)
-            .attr('y2', 640)
+            .attr('x1', 395+i*nb)
+            .attr('y1', 16)
+            .attr('x2', 395+i*nb)
+            .attr('y2', 610)
             .attr('stroke', '#54301D')
             .attr('stroke-width', 8)
 
@@ -255,59 +266,7 @@ socket.on("initialisation affichage", noeuds => {
         displayNode(svg, noeuds[i].coordonnees, noeuds[i])
     }
 
-   //lignes
-    /*
-   let cont=60
-   for(let i=0; i < 3; i++){
-        svg.append('line')
-        .attr('x1', 200)
-        .attr('y1', 10+cont*i)
-        .attr('x2', 318)
-        .attr('y2', 10+cont*i)
-        .attr('stroke', '#54301D')
-        .attr('stroke-width', 8)
-   }
-   //colonnes
-    svg.append('line')
-        .attr('x1', 198)
-        .attr('y1', 6)
-        .attr('x2', 198)
-        .attr('y2', 134)
-        .attr('stroke', '#54301D')
-        .attr('stroke-width', 8)
 
-    svg.append('line')
-        .attr('x1', 318)
-        .attr('y1', 6)
-        .attr('x2', 318)
-        .attr('y2', 134)
-        .attr('stroke', '#54301D')
-        .attr('stroke-width', 8)
-   let nb=120
-   let nb2=118
-   console.log("nombre joueurs " + nombreJoueurs)
-
-    for(let i=0; i < nombreJoueurs; i++){
-        svg.append('line')
-        .attr('x1', 318+nb*(i+1))
-        .attr('y1', 6)
-        .attr('x2', 318+nb*(i+1))
-        .attr('y2', 134)
-        .attr('stroke', '#54301D')
-        .attr('stroke-width', 8)
-        for(let j=0; j<3; j++){
-            svg.append('line')
-            .attr('x1', 200+nb2*(i+1))
-            .attr('y1', 10+cont*j)
-            .attr('x2', 318+nb2*(i+1))
-            .attr('y2', 10+cont*j)
-            .attr('stroke', '#54301D')
-            .attr('stroke-width', 8)
-
-        }
-
-    }
-*/
 
 
     let listeJoueurs=document.getElementById("nombreJoueurs")
@@ -442,7 +401,7 @@ function createChariot(nodes, time)
     let beginTime = document.getElementById("svg").getCurrentTime()
     let bookSupportSVGGroup = d3.select("svg").append("g")
 
-    let path = `M-250 400 L-50 400 L-50 450 L-250 450 Z`
+    let path = `M-250 750 L-50 750 L-50 800 L-250 800 Z`
     bookSupportSVGGroup
         .append("path")
         .attr("d", path)
@@ -462,175 +421,7 @@ function createChariot(nodes, time)
         .attr("repeatCount", 1)
         .attr("fill", "freeze")
 
-
-      /*<animateTransform
-      attributeName="transform"
-      attributeType="XML"
-      type="translate"
-      from="0"
-      to="20"
-      begin="0.5s"
-      dur="0.2s"
-      repeatCount="1"
-      fill="freeze"
-      additive="sum"/>*/
-
     for (let i = 0; i < nodes.length; i++) {
         displayNode(bookSupportSVGGroup, nodes[i].coordonnees, nodes[i])
     }
 }
-
-//TEST D3
-
-(async () => {
-    let books = await fetch("./books.json")
-    let jsonBooks = await books.json()
-    for(let i = 0; i < jsonBooks.length; i++)
-    {
-        jsonBooks[i] = Object.assign(new Book(), jsonBooks[i])
-    }
-
-    for(let i = 0; i < 12; i++){
-        displayBook([32*(i+1),200], jsonBooks[i])
-    }
-    /*nodes1 = [{id:"40", book:jsonBooks[0]}, {id:"41", book:jsonBooks[1]}, {id:"42", book:jsonBooks[2]}]
-    nodes2 = [{id:"43", book:undefined}, {id:"44", book:undefined}, {id:"45", book:undefined}]
-    createBookSupport(nodes1)
-    createBookSupport2(nodes2)*/
-})()
-
-
-//tableau
-
-
-
-
-//etageres
-
-setTimeout(()=> {
-
-var svg = d3.select("svg")
-svg.append('line')
-    .attr('x1', 10)
-    .attr('y1', 50)
-    .attr('x2', 450)
-    .attr('y2', 50)
-    .attr('stroke', '#54301D')
-    .attr('stroke-width', 8)
-
-}, 200)
-
-setTimeout(()=> {
-
-var svg = d3.select("svg")
-svg.append('line')
-    .attr('x1', 10)
-    .attr('y1', 200)
-    .attr('x2', 450)
-    .attr('y2', 200)
-    .attr('stroke', '#54301D')
-    .attr('stroke-width', 8)
-
-}, 200)
-
-setTimeout(()=> {
-
-var svg = d3.select("svg")
-svg.append('line')
-    .attr('x1', 10)
-    .attr('y1', 350)
-    .attr('x2', 450)
-    .attr('y2', 350)
-    .attr('stroke', '#54301D')
-    .attr('stroke-width', 8)
-
-}, 200)
-
-setTimeout(()=> {
-
-var svg = d3.select("svg")
-svg.append('line')
-    .attr('x1', 10)
-    .attr('y1', 500)
-    .attr('x2', 450)
-    .attr('y2', 500)
-    .attr('stroke', '#54301D')
-    .attr('stroke-width', 8)
-
-}, 200)
-
-
-
-
-setTimeout(()=> {
-
-var svg = d3.select("svg")
-svg.append('line')
-    .attr('x1', 10)
-    .attr('y1', 46)
-    .attr('x2', 10)
-    .attr('y2', 640)
-    .attr('stroke', '#54301D')
-    .attr('stroke-width', 8)
-
-}, 200)
-
-
-setTimeout(()=> {
-
-var svg = d3.select("svg")
-svg.append('line')
-    .attr('x1', 450)
-    .attr('y1', 46)
-    .attr('x2', 450)
-    .attr('y2', 640)
-    .attr('stroke', '#54301D')
-    .attr('stroke-width', 8)
-
-}, 200)
-
-
-
-
-
-
-/*
-function creeHexagone(rayon) {
-    var points = new Array();
-    for (var i = 0; i < 6; ++i) { 
-    var angle = i * Math.PI / 3;
-    var x = Math.sin(angle) * rayon;
-    var y = -Math.cos(angle) * rayon;
-        console.log("x="+Math.round(x*100)/100+" y="+Math.round(y*100)/100);
-    points.push([Math.round(x*100)/100, Math.round(y*100)/100]);
-    }
-    return points;
-}
-
-function genereDamier(rayon, nbLignes, nbColonnes) {
-
-distance =  rayon - (Math.sin(1 * Math.PI / 3) * rayon);  // plus grande distance entre l'hexagone et le cercle circonscrit
-
-
-var hexagone = creeHexagone(rayon);
-for (var ligne=0; ligne < nbLignes; ligne++) {
-    for (var colonne=0; colonne < nbColonnes; colonne++) {
-        var d = "";
-        var x, y;
-        for (h in hexagone) {
-            x = hexagone[h][0]+(rayon-distance)*(2+2*colonne);
-            y = distance*2 + hexagone[h][1]+(rayon-distance*2)*(1+2*ligne);
-            // A COMPLETER
-        }
-        d += "Z";
-        d3.select("svg")   
-            .append("path")
-            .attr("d", d)
-            .attr("stroke", "black")
-            .attr("fill", "white")
-            .attr("id", "h"+(ligne*11+colonne)) // car un id doit commencer par une lettre
-            .on("click", function(d) {  
-                console.log(d.target.id)
-                socket.emit("colorHex", d.target.id)
-                d3.select(this).attr('fill', 'red');
-*/

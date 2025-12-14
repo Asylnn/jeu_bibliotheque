@@ -29,7 +29,7 @@ let dict_joueurs={}
 let dict_noeuds={}
 let nb=30;
 let cmp=150;
-let h=540;
+let h=420;
 let intervalChariotId;
 
 function initialisationNoeuds()
@@ -37,12 +37,12 @@ function initialisationNoeuds()
     dict_noeuds = {}
     for(let k=0; k < 3; k++){
         for(let j=0; j < 3; j++){
-            for(let i=0; i < 14; i++){
+            for(let i=0; i < 12; i++){
                 const id =`n${j}${k}e${i}` 
                 dict_noeuds[id] = {
                     "id":id,
                     "book":undefined,
-                    "coordonnees":[30+i*nb+k*h, 200+j*cmp]
+                    "coordonnees":[25+i*nb+k*h, 170+j*cmp]
                 }
                 
             }
@@ -119,7 +119,7 @@ function creerChariot()
         const noeud = {
             "id":id,
             "book":books[Math.floor(Math.random()* books.length)],
-            "coordonnees":[-240 + i*40, 400]
+            "coordonnees":[-240 + i*40, 750]
         }
         noeudsChariot.push(noeud)
         dict_noeuds[id] = noeud

@@ -1,8 +1,65 @@
 * {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding : 0px;
+    margin : 0px;
 }
 
-.noeud:hover
+#page
 {
-    background-color: blue;
+    margin-left: 10px;
+}
+
+#jeu_messagerie
+{
+    display:flex;
+    /*place-content: center;
+    place-items: center;*/
+    flex-direction: row;
+}
+
+header
+{
+    display:grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr 6fr;
+    place-content: center;
+    place-items: center;
+    background-color: antiquewhite;
+    padding : 10px 10px;
+    margin-bottom: 20px;
+}
+
+button
+{
+    padding : 0px 10px;
+}
+
+header button
+{
+    padding : 5px 10px;
+}
+
+#chat
+{
+    margin-left: 10px;
+    padding: 20px;
+    border-radius: 10px;
+    border-color: black;
+    border-style: solid;
+    border-width: 7px;
+    display:flex;
+    /*flex-direction: column;*/
+    flex-flow: column-reverse;
+}
+
+#points_table
+{
+    /*align-self: flex-end;*/
+    display:flex;
+    flex-direction: column;
+}
+
+.points_line
+{
+    display:grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
 }
