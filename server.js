@@ -223,6 +223,7 @@ io.on("connect", (socket) => {
             
         else {
             socket.emit("affichage noeud", undefined)
+            let pointsNegatif = getPoints(dict_joueurs[socket.id].selectionNoeud)
             //Sinon on deplace le livre au nouveau noeud
             dict_noeuds[id].book = dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book
             dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book = undefined
@@ -230,99 +231,21 @@ io.on("connect", (socket) => {
             //socket.emit("confirmation mouvement livre")
             //On met a jour l'affichage de tout les noeuds de tout les clients
             io.emit("liste noeuds", dict_noeuds)
-            const book = dict_noeuds[dict_joueurs[socket.id].selectionNoeud].book
             dict_joueurs[socket.id].selectionNoeud = undefined
-            const point=0
-            let pointsDroitG=verificationVoisinDroitApportePoints(id, "genre")
-            let pointsDroitF=verificationVoisinDroitApportePoints(id, "format")
-            let pointsDroitA=verificationVoisinDroitApportePoints(id, "auteur")
-            let pointsDroitT=verificationVoisinDroitApportePoints(id, "titre")
-            let pointsDroit=pointsDroitA+pointsDroitF+pointsDroitG+pointsDroitT
 
+            let points = getPoints(id)
 
-            let pointsGaucheG=verificationVoisinGaucheApportePoints(id, "genre")
-            let pointsGaucheF=verificationVoisinGaucheApportePoints(id, "format")
-            let pointsGaucheA=verificationVoisinGaucheApportePoints(id, "auteur")
-            let pointsGaucheT=verificationVoisinGaucheApportePoints(id, "titre")
-            let pointsGauche=pointsGaucheA+pointsGaucheF+pointsGaucheG+pointsGaucheT
-            let totalPoints=pointsDroit+pointsGauche
-            dict_joueurs[socket.id].totalPointsPartie+=totalPoints
+            dict_joueurs[socket.id].totalPointsPartie += points - pointsNegatif
 
+            socket.emit("envoie points client", getPointsJoueurs())
 
-            function verificationVoisinDroitApportePoints(id, type){
-                const tab=id.split("e")
-                const tabId=tab[1]
-                const tabIdSuiv=+tabId+1
-                nIdSuiv=`${tab[0]}e${tabIdSuiv}`
-
-                if(dict_noeuds[nIdSuiv] == null)
-                    return 0
-
-                if(dict_noeuds[nIdSuiv].book == null)
-                    return 0
-
-                //console.log("voisin droit pas null et livre pas null")
-                //console.log(dict_noeuds[id].book)
-           
-                if ((type == "genre") && (dict_noeuds[nIdSuiv].book.genre == dict_noeuds[id].book.genre)){
-                        
-                        return verificationVoisinDroitApportePoints(nIdSuiv, type) + 1
-                }
-                else if ((type == "auteur") && (dict_noeuds[nIdSuiv].book.auteur == dict_noeuds[id].book.auteur)){
-                        
-                        return verificationVoisinDroitApportePoints(nIdSuiv, type) + 1
-                }
-                else if ((type == "format") && (dict_noeuds[nIdSuiv].book.format == dict_noeuds[id].book.format)){
-
-                        return verificationVoisinDroitApportePoints(nIdSuiv, type) + 1
-                }
-                else if ((type == "titre") && (dict_noeuds[nIdSuiv].book.titre >= dict_noeuds[id].book.titre)){
-                    return verificationVoisinDroitApportePoints(nIdSuiv, type) + 1
-                }
-
-                return 0
-                
-                
+            if(dict_joueurs[socket.id].totalPointsPartie > 150)
+            {
+                socket.emit("victoire", dict_joueurs[socket.id].nom)
+                setTimeout(() => {
+                    finPartie()
+                }, 5_000)
             }
-
-            function verificationVoisinGaucheApportePoints(id, type){
-                    const tab=id.split("e")
-                    const tabId=tab[1]
-                    const tabIdPrec=+tabId-1
-                    nIdPrec=`${tab[0]}e${tabIdPrec}`
-                    
-                if(dict_noeuds[nIdPrec] == null)
-                    return 0
-
-                if(dict_noeuds[nIdPrec].book == null)
-                    return 0
-
-                //console.log("voisin gauche pas null et livre pas null")
-                //console.log(dict_noeuds[id].book.format)
-                
-                if ((type == "genre") && (dict_noeuds[nIdPrec].book.genre == dict_noeuds[id].book.genre)){
-                    return verificationVoisinGaucheApportePoints(nIdPrec, type) + 1
-                }
-                else if ((type == "auteur") && (dict_noeuds[nIdPrec].book.auteur == dict_noeuds[id].book.auteur)){
-                  
-                    return verificationVoisinGaucheApportePoints(nIdPrec, type) + 1
-                }
-                else if ((type == "format") && (dict_noeuds[nIdPrec].book.format == dict_noeuds[id].book.format)){
-
-                    return verificationVoisinGaucheApportePoints(nIdPrec, type) + 1
-                
-                }
-                else if ((type == "titre") && (dict_noeuds[nIdPrec].book.titre <= dict_noeuds[id].book.titre)){
-
-                    return verificationVoisinGaucheApportePoints(nIdPrec, type) + 1
-                
-                }
-
-                return 0
-                
-            }
-
-             socket.emit("envoie points client", getPointsJoueurs())
             
         }
    
@@ -351,3 +274,94 @@ io.on("connect", (socket) => {
     
 })
 
+function getPoints(id)
+{
+    let pointsDroitG=verificationVoisinDroitApportePoints(id, "genre")
+    let pointsDroitF=verificationVoisinDroitApportePoints(id, "format")
+    let pointsDroitA=verificationVoisinDroitApportePoints(id, "auteur")
+    let pointsDroitT=verificationVoisinDroitApportePoints(id, "titre")
+    let pointsDroit=pointsDroitA+pointsDroitF+pointsDroitG+pointsDroitT
+
+
+    let pointsGaucheG=verificationVoisinGaucheApportePoints(id, "genre")
+    let pointsGaucheF=verificationVoisinGaucheApportePoints(id, "format")
+    let pointsGaucheA=verificationVoisinGaucheApportePoints(id, "auteur")
+    let pointsGaucheT=verificationVoisinGaucheApportePoints(id, "titre")
+    let pointsGauche=pointsGaucheA+pointsGaucheF+pointsGaucheG+pointsGaucheT
+    let totalPoints=pointsDroit+pointsGauche
+    
+    return totalPoints
+
+    function verificationVoisinDroitApportePoints(id, type){
+        const tab=id.split("e")
+        const tabId=tab[1]
+        const tabIdSuiv=+tabId+1
+        nIdSuiv=`${tab[0]}e${tabIdSuiv}`
+
+        if(dict_noeuds[nIdSuiv] == null)
+            return 0
+
+        if(dict_noeuds[nIdSuiv].book == null)
+            return 0
+
+        //console.log("voisin droit pas null et livre pas null")
+        //console.log(dict_noeuds[id].book)
+   
+        if ((type == "genre") && (dict_noeuds[nIdSuiv].book.genre == dict_noeuds[id].book.genre)){
+                
+                return verificationVoisinDroitApportePoints(nIdSuiv, type) + 1
+        }
+        else if ((type == "auteur") && (dict_noeuds[nIdSuiv].book.auteur == dict_noeuds[id].book.auteur)){
+                
+                return verificationVoisinDroitApportePoints(nIdSuiv, type) + 1
+        }
+        else if ((type == "format") && (dict_noeuds[nIdSuiv].book.format == dict_noeuds[id].book.format)){
+
+                return verificationVoisinDroitApportePoints(nIdSuiv, type) + 1
+        }
+        else if ((type == "titre") && (dict_noeuds[nIdSuiv].book.titre >= dict_noeuds[id].book.titre)){
+            return verificationVoisinDroitApportePoints(nIdSuiv, type) + 2
+        }
+
+        return 0
+        
+        
+    }
+
+    function verificationVoisinGaucheApportePoints(id, type){
+            const tab=id.split("e")
+            const tabId=tab[1]
+            const tabIdPrec=+tabId-1
+            nIdPrec=`${tab[0]}e${tabIdPrec}`
+            
+        if(dict_noeuds[nIdPrec] == null)
+            return 0
+
+        if(dict_noeuds[nIdPrec].book == null)
+            return 0
+
+        //console.log("voisin gauche pas null et livre pas null")
+        //console.log(dict_noeuds[id].book.format)
+        
+        if ((type == "genre") && (dict_noeuds[nIdPrec].book.genre == dict_noeuds[id].book.genre)){
+            return verificationVoisinGaucheApportePoints(nIdPrec, type) + 1
+        }
+        else if ((type == "auteur") && (dict_noeuds[nIdPrec].book.auteur == dict_noeuds[id].book.auteur)){
+          
+            return verificationVoisinGaucheApportePoints(nIdPrec, type) + 1
+        }
+        else if ((type == "format") && (dict_noeuds[nIdPrec].book.format == dict_noeuds[id].book.format)){
+
+            return verificationVoisinGaucheApportePoints(nIdPrec, type) + 1
+        
+        }
+        else if ((type == "titre") && (dict_noeuds[nIdPrec].book.titre <= dict_noeuds[id].book.titre)){
+
+            return verificationVoisinGaucheApportePoints(nIdPrec, type) + 2
+        
+        }
+
+        return 0
+        
+    }
+}

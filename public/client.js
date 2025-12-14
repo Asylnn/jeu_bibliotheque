@@ -9,6 +9,7 @@ let nomsJoueurs = []
 let totalPoints = 0
 let noeudSelectionné = {}
 
+
 socket.emit("ping")
 socket.on("pong", data => {
     console.log("recu pong")
@@ -139,6 +140,10 @@ function terminerLaPartie()
  {
     partieEnCours = false
     dansLaPartie = false
+
+    document.getElementById("victoire").textContent = ``
+    document.getElementById("veil").style.display = "none"
+
     testAffichageBoutonCommencerTerminer()
 
     let svg = d3.select("svg")
@@ -346,6 +351,10 @@ svg.append('line')
 }, 200)
 */
 
+socket.on("victoire", nom_gagnant => {
+    document.getElementById("victoire").textContent = `${nom_gagnant} a gagné la partie!`
+    document.getElementById("veil").style.display = "block"
+})
 
 //Lorsque le client recoit la liste de tout les noeuds (lorsque un joueur déplace un livre) et met a jour l'affichage
 socket.on("liste noeuds", noeuds => {
