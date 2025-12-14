@@ -324,6 +324,8 @@ function initialisationAffichage(noeuds) {
 
     let listeJoueurs=document.getElementById("nombreJoueurs")
     let points=document.getElementById("points")
+
+    createWheels()
     /*
     for(let i=0; i<nombreJoueurs; i++){
         listeJoueurs.innerHTML += `${nomsJoueurs[i]}`
@@ -464,5 +466,47 @@ function createChariot(nodes, time)
 
     for (let i = 0; i < nodes.length; i++) {
         displayNode(bookSupportSVGGroup, nodes[i].coordonnees, nodes[i])
+    }
+}
+
+function createWheels()
+{   
+    for (let i = -1; i < 60; i++) {
+        
+        
+        console.log('creating wheels...')
+        let wheelSupportSVGGroup = d3.select("svg").append("g").attr("x", 20).attr("y", 820)
+        //let path = `M-280 750 L-20 750 L-50 800 L-250 800 Z`
+        wheelSupportSVGGroup
+            .append("circle")
+            .attr("r", 10)
+            .attr("cx", 20 + i*30)
+            .attr("cy", 815)
+            .attr("stroke", "black")
+            .attr("stroke-width", 3)
+            .attr("fill", "white")
+
+        wheelSupportSVGGroup
+            .append("path")
+            .attr("d", `M${10 + i*30} 815 L${30 + i*30} 815`)
+            .attr("stroke", "black")
+            .attr("stroke-width", 2)
+            //.attr("fill", "white")
+        
+        wheelSupportSVGGroup
+            .append("path")
+            .attr("d", `M${20 + i*30} 805 L${20 + i*30} 825`)
+            .attr("stroke", "black")
+            .attr("stroke-width", 2)
+            
+        wheelSupportSVGGroup
+            .append("animateTransform")
+            .attr("attributeName", "transform")
+            .attr("attributeType", "XML")
+            .attr("type", "rotate")
+            .attr("from", `0 ${20 + 30*i} 815`)
+            .attr("to", `360 ${20 + 30*i} 815`)
+            .attr("dur", "2s")
+            .attr("repeatCount", "indefinite")
     }
 }
